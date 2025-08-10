@@ -1,0 +1,43 @@
+.view-toggle {
+  display: flex;
+  background: #f3f2f1;
+  border-radius: 4px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.view-toggle__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  color: #605e5c;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  height: 32px;
+}
+
+.view-toggle__button:hover {
+  background: #e1dfdd;
+  color: #323130;
+}
+
+.view-toggle__button--active {
+  background: white;
+  color: #0078d4;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.view-toggle__button--active:hover {
+  background: white;
+  color: #0078d4;
+}
+
+.view-toggle__button:focus {
+  outline: 2px solid #0078d4;
+  outline-offset: 2px;
+}

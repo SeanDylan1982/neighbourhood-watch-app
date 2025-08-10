@@ -1,0 +1,280 @@
+/* AttachmentPicker Component Styles */
+
+.attachment-picker {
+  background: var(--background-paper);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.attachment-picker--mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 16px 16px 0 0;
+  z-index: 1300;
+}
+
+.attachment-picker--desktop {
+  position: fixed;
+  min-width: 280px;
+  border-radius: 12px;
+  z-index: 1300;
+}
+
+.attachment-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--background-paper);
+}
+
+.attachment-picker__title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.attachment-picker__close {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.attachment-picker__close:hover {
+  background: var(--action-hover);
+  color: var(--text-primary);
+}
+
+.attachment-picker__grid {
+  display: grid;
+  padding: 16px;
+  gap: 8px;
+}
+
+.attachment-picker__grid--mobile {
+  grid-template-columns: repeat(3, 1fr);
+  padding: 16px;
+}
+
+.attachment-picker__grid--desktop {
+  grid-template-columns: repeat(2, 1fr);
+  padding: 8px;
+  min-width: 240px;
+}
+
+.attachment-picker__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.attachment-picker__option:hover {
+  background: var(--action-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-picker__option:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-picker__option--disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.attachment-picker__option--disabled:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+.attachment-picker__icon-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.attachment-picker__icon-container--desktop {
+  width: 40px;
+  height: 40px;
+}
+
+.attachment-picker__option:hover .attachment-picker__icon-container {
+  transform: scale(1.1);
+}
+
+.attachment-picker__icon {
+  color: white;
+  font-size: 24px;
+  z-index: 1;
+}
+
+.attachment-picker__icon--desktop {
+  font-size: 20px;
+}
+
+.attachment-picker__icon-container--camera {
+  background: #4CAF50;
+}
+
+.attachment-picker__icon-container--gallery {
+  background: #2196F3;
+}
+
+.attachment-picker__icon-container--document {
+  background: #FF9800;
+}
+
+.attachment-picker__icon-container--location {
+  background: #F44336;
+}
+
+.attachment-picker__icon-container--contact {
+  background: #9C27B0;
+}
+
+.attachment-picker__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.attachment-picker__label--mobile {
+  font-size: 0.75rem;
+}
+
+.attachment-picker__safe-area {
+  height: env(safe-area-inset-bottom, 16px);
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.attachment-picker--mobile {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.attachment-picker--desktop {
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ripple effect for touch interactions */
+.attachment-picker__option::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+  pointer-events: none;
+}
+
+.attachment-picker__option:active::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .attachment-picker {
+    background: var(--background-paper-dark, #1e1e1e);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .attachment-picker__option:hover {
+    background: var(--action-hover-dark, rgba(255, 255, 255, 0.08));
+  }
+  
+  .attachment-picker__option::before {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .attachment-picker {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .attachment-picker__option {
+    border: 1px solid var(--divider);
+  }
+  
+  .attachment-picker__option:hover {
+    border-color: var(--primary-main);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .attachment-picker,
+  .attachment-picker__option,
+  .attachment-picker__icon-container,
+  .attachment-picker__close {
+    transition: none;
+    animation: none;
+  }
+  
+  .attachment-picker__option:hover {
+    transform: none;
+  }
+  
+  .attachment-picker__option:hover .attachment-picker__icon-container {
+    transform: none;
+  }
+}

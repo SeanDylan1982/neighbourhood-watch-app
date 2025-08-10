@@ -1,0 +1,65 @@
+/* Pin Icon Component Styles */
+
+.pin-icon {
+  transition: all 0.2s ease-in-out;
+}
+
+.pin-icon:hover {
+  transform: rotate(45deg) scale(1.1);
+}
+
+/* Animation for pin icon appearance */
+@keyframes pinAppear {
+  0% {
+    opacity: 0;
+    transform: rotate(45deg) scale(0.5);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+  }
+}
+
+.pin-icon-animated {
+  animation: pinAppear 0.3s ease-out;
+}
+
+/* Absolute positioned pin icon styles */
+.pin-icon-absolute {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Pin icon for different themes */
+.pin-icon-light {
+  color: #1976d2;
+}
+
+.pin-icon-dark {
+  color: #90caf9;
+}
+
+/* Pin icon sizes */
+.pin-icon-small {
+  width: 16px;
+  height: 16px;
+}
+
+.pin-icon-medium {
+  width: 20px;
+  height: 20px;
+}
+
+.pin-icon-large {
+  width: 24px;
+  height: 24px;
+}

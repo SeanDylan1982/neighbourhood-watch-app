@@ -1,0 +1,412 @@
+/* Legal Documents Section Styles */
+.legal-documents-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.section-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+}
+
+.section-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.section-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Documents Grid */
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.document-card {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+}
+
+.document-card:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.document-icon {
+  font-size: 2rem;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.document-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.document-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.document-arrow {
+  font-size: 1.2rem;
+  color: #9ca3af;
+  margin-left: 12px;
+  transition: transform 0.2s ease;
+}
+
+.document-card:hover .document-arrow {
+  transform: translateX(4px);
+  color: #3b82f6;
+}
+
+/* Legal Notice */
+.legal-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.notice-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notice-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+.notice-content p {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: #0369a1;
+  line-height: 1.5;
+}
+
+.notice-content p:last-child {
+  margin-bottom: 0;
+}
+
+.notice-content strong {
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+/* Modal Styles */
+.legal-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.legal-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.modal-document-viewer {
+  box-shadow: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .legal-documents-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .documents-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .document-card {
+    padding: 12px;
+  }
+  
+  .document-icon {
+    font-size: 1.5rem;
+    margin-right: 12px;
+  }
+  
+  .document-info h4 {
+    font-size: 0.95rem;
+  }
+  
+  .document-info p {
+    font-size: 0.8rem;
+  }
+  
+  .legal-notice {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .notice-icon {
+    align-self: flex-start;
+  }
+  
+  .legal-modal-overlay {
+    padding: 10px;
+  }
+  
+  .legal-modal {
+    max-height: 95vh;
+    border-radius: 8px;
+  }
+  
+  .modal-header {
+    padding: 16px 16px 12px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .legal-documents-section {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .section-header {
+    border-bottom-color: #374151;
+  }
+  
+  .section-header h3 {
+    color: #f9fafb;
+  }
+  
+  .section-header p {
+    color: #9ca3af;
+  }
+  
+  .document-card {
+    background: #111827;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .document-card:hover {
+    background: #1e293b;
+    border-color: #3b82f6;
+  }
+  
+  .document-info h4 {
+    color: #f9fafb;
+  }
+  
+  .document-info p {
+    color: #9ca3af;
+  }
+  
+  .document-arrow {
+    color: #6b7280;
+  }
+  
+  .document-card:hover .document-arrow {
+    color: #3b82f6;
+  }
+  
+  .legal-notice {
+    background: #0f172a;
+    border-color: #0ea5e9;
+  }
+  
+  .notice-content h4 {
+    color: #38bdf8;
+  }
+  
+  .notice-content p {
+    color: #7dd3fc;
+  }
+  
+  .notice-content strong {
+    color: #38bdf8;
+  }
+  
+  .legal-modal {
+    background: #1f2937;
+  }
+  
+  .modal-header {
+    background: #111827;
+    border-bottom-color: #374151;
+  }
+  
+  .modal-header h2 {
+    color: #f9fafb;
+  }
+  
+  .modal-close {
+    color: #9ca3af;
+  }
+  
+  .modal-close:hover {
+    background-color: #374151;
+    color: #f3f4f6;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .legal-documents-section {
+    border: 2px solid #000;
+  }
+  
+  .document-card {
+    border: 2px solid #000;
+  }
+  
+  .legal-notice {
+    border: 2px solid #000;
+  }
+  
+  .legal-modal {
+    border: 2px solid #000;
+  }
+  
+  .modal-header {
+    border-bottom: 2px solid #000;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .legal-modal {
+    animation: none;
+  }
+  
+  .document-card {
+    transition: none;
+  }
+  
+  .document-card:hover {
+    transform: none;
+  }
+  
+  .document-arrow {
+    transition: none;
+  }
+  
+  .document-card:hover .document-arrow {
+    transform: none;
+  }
+  
+  .modal-close {
+    transition: none;
+  }
+}

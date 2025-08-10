@@ -1,0 +1,347 @@
+.message-input-with-reply {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.message-input-with-reply:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.message-input-container {
+  position: relative;
+  padding: 8px;
+}
+
+.message-input-field {
+  background: transparent;
+}
+
+.message-input-field .MuiOutlinedInput-root {
+  border-radius: 8px;
+  padding-right: 4px;
+  background: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.message-input-field .MuiOutlinedInput-root:hover {
+  background: #f0f2f5;
+}
+
+.message-input-field .MuiOutlinedInput-root.Mui-focused {
+  background: #fff;
+}
+
+.message-input-field .MuiOutlinedInput-notchedOutline {
+  border-color: #e0e0e0;
+  transition: border-color 0.2s ease;
+}
+
+.message-input-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #bdbdbd;
+}
+
+.message-input-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #2196f3;
+  border-width: 2px;
+}
+
+.message-input-field .MuiInputBase-input {
+  padding: 12px 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+}
+
+.message-input-field .MuiInputBase-input::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.input-end-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+
+.send-button {
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.send-button.can-send {
+  background: #2196f3;
+  color: white;
+  transform: scale(1.1);
+}
+
+.send-button.can-send:hover {
+  background: #1976d2;
+  transform: scale(1.15);
+}
+
+.send-button:not(.can-send) {
+  color: #bdbdbd;
+}
+
+.character-count {
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.character-count.limit-exceeded {
+  color: #f44336;
+  font-weight: 500;
+}
+
+/* Reply preview integration */
+.message-input-with-reply .reply-preview {
+  margin: 0;
+  border-radius: 0;
+  border-left: none;
+  border-top: 4px solid #2196f3;
+  background: #f8f9fa;
+  box-shadow: none;
+}
+
+.message-input-with-reply .reply-preview:hover {
+  background: #f0f2f5;
+}
+
+/* Loading state */
+.message-input-with-reply.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.message-input-with-reply.loading .send-button {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .message-input-with-reply {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .message-input-field .MuiOutlinedInput-root {
+    background: #404040;
+    color: #e0e0e0;
+  }
+  
+  .message-input-field .MuiOutlinedInput-root:hover {
+    background: #4a4a4a;
+  }
+  
+  .message-input-field .MuiOutlinedInput-root.Mui-focused {
+    background: #333;
+  }
+  
+  .message-input-field .MuiOutlinedInput-notchedOutline {
+    border-color: #555;
+  }
+  
+  .message-input-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: #666;
+  }
+  
+  .message-input-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #64b5f6;
+  }
+  
+  .message-input-field .MuiInputBase-input::placeholder {
+    color: #999;
+  }
+  
+  .send-button.can-send {
+    background: #64b5f6;
+  }
+  
+  .send-button.can-send:hover {
+    background: #42a5f5;
+  }
+  
+  .character-count {
+    color: #999;
+  }
+  
+  .character-count.limit-exceeded {
+    color: #ff6b6b;
+  }
+  
+  .message-input-with-reply .reply-preview {
+    background: #404040;
+    border-top-color: #64b5f6;
+  }
+  
+  .message-input-with-reply .reply-preview:hover {
+    background: #4a4a4a;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .message-input-with-reply {
+    border-radius: 8px;
+    margin: 8px;
+  }
+  
+  .message-input-container {
+    padding: 6px;
+  }
+  
+  .message-input-field .MuiInputBase-input {
+    padding: 10px 6px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .input-end-actions {
+    gap: 2px;
+  }
+  
+  .send-button {
+    padding: 6px;
+  }
+  
+  .character-count {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .message-input-field .MuiInputBase-input {
+    font-size: 15px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .message-input-with-reply {
+    border: 2px solid #000;
+    background: #fff;
+  }
+  
+  .message-input-field .MuiOutlinedInput-root {
+    background: #fff;
+    border: 2px solid #000;
+  }
+  
+  .message-input-field .MuiOutlinedInput-notchedOutline {
+    border-color: #000;
+    border-width: 2px;
+  }
+  
+  .send-button.can-send {
+    background: #000;
+    color: #fff;
+    border: 2px solid #000;
+  }
+  
+  .send-button:not(.can-send) {
+    color: #000;
+    border: 1px solid #000;
+  }
+  
+  .character-count.limit-exceeded {
+    color: #000;
+    background: #ff0;
+    padding: 2px 4px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .message-input-with-reply {
+    transition: none;
+  }
+  
+  .message-input-field .MuiOutlinedInput-root {
+    transition: none;
+  }
+  
+  .message-input-field .MuiOutlinedInput-notchedOutline {
+    transition: none;
+  }
+  
+  .send-button {
+    transition: none;
+  }
+  
+  .send-button.can-send {
+    transform: none;
+  }
+  
+  .send-button.can-send:hover {
+    transform: none;
+  }
+  
+  .message-input-with-reply.loading .send-button {
+    animation: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.message-input-with-reply:focus-within {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* RTL support */
+[dir="rtl"] .input-end-actions {
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+[dir="rtl"] .character-count {
+  text-align: left;
+}
+
+[dir="rtl"] .message-input-with-reply .reply-preview {
+  border-top: 4px solid #2196f3;
+}
+
+/* Print styles */
+@media print {
+  .message-input-with-reply {
+    display: none;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .message-input-field .MuiInputBase-input {
+    max-height: 60px;
+    overflow-y: auto;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+  .message-input-container {
+    padding: 12px;
+  }
+  
+  .message-input-field .MuiInputBase-input {
+    padding: 14px 12px;
+  }
+}

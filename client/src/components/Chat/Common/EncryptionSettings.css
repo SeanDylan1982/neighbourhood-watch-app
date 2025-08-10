@@ -1,0 +1,295 @@
+.encryption-settings {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.encryption-settings__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.encryption-settings__header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.encryption-settings__close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.encryption-settings__close:hover {
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.encryption-settings__content {
+  padding: 20px 24px 24px;
+}
+
+.encryption-settings__status {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.encryption-settings__description {
+  margin-bottom: 20px;
+}
+
+.encryption-settings__description p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.encryption-settings__warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.encryption-settings__warning-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.encryption-settings__warning p {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.encryption-settings__controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.encryption-settings__toggle {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.encryption-settings__toggle:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.encryption-settings__toggle:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.encryption-settings__toggle--enabled {
+  background-color: #dc3545;
+}
+
+.encryption-settings__toggle--enabled:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.encryption-settings__info {
+  margin-bottom: 20px;
+}
+
+.encryption-settings__info h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.encryption-settings__info ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #555;
+}
+
+.encryption-settings__info li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.encryption-settings__key-info {
+  border-top: 1px solid #e9ecef;
+  padding-top: 20px;
+}
+
+.encryption-settings__key-info h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.encryption-settings__key-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.encryption-settings__key-display code {
+  flex: 1;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  color: #495057;
+  background: none;
+  border: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.encryption-settings__copy-key {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.encryption-settings__copy-key:hover {
+  background-color: #e9ecef;
+}
+
+.encryption-settings__key-note {
+  margin: 0;
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .encryption-settings {
+    background: #2c2c2c;
+    color: #e9ecef;
+  }
+
+  .encryption-settings__header {
+    border-bottom-color: #495057;
+  }
+
+  .encryption-settings__header h3 {
+    color: #e9ecef;
+  }
+
+  .encryption-settings__close {
+    color: #adb5bd;
+  }
+
+  .encryption-settings__close:hover {
+    background-color: #495057;
+    color: #e9ecef;
+  }
+
+  .encryption-settings__description p {
+    color: #ced4da;
+  }
+
+  .encryption-settings__warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-color: rgba(255, 193, 7, 0.3);
+  }
+
+  .encryption-settings__warning p {
+    color: #ffc107;
+  }
+
+  .encryption-settings__info h4 {
+    color: #e9ecef;
+  }
+
+  .encryption-settings__info ul {
+    color: #ced4da;
+  }
+
+  .encryption-settings__key-info {
+    border-top-color: #495057;
+  }
+
+  .encryption-settings__key-info h4 {
+    color: #e9ecef;
+  }
+
+  .encryption-settings__key-display {
+    background-color: #495057;
+    border-color: #6c757d;
+  }
+
+  .encryption-settings__key-display code {
+    color: #e9ecef;
+  }
+
+  .encryption-settings__copy-key:hover {
+    background-color: #6c757d;
+  }
+
+  .encryption-settings__key-note {
+    color: #adb5bd;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .encryption-settings {
+    width: 95vw;
+    max-height: 85vh;
+  }
+
+  .encryption-settings__header {
+    padding: 16px 20px 12px;
+  }
+
+  .encryption-settings__content {
+    padding: 16px 20px 20px;
+  }
+
+  .encryption-settings__header h3 {
+    font-size: 16px;
+  }
+
+  .encryption-settings__toggle {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}

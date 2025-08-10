@@ -1,0 +1,90 @@
+/* LocationPicker Component Styles */
+
+.location-picker {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .location-picker {
+    padding: 0;
+  }
+  
+  .location-picker .MuiButton-root {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .location-picker .MuiCard-root {
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Location preview animations */
+.location-picker .MuiCard-root {
+  transition: all 0.2s ease-in-out;
+}
+
+.location-picker .MuiCard-root:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Loading state styles */
+.location-picker .MuiButton-root.Mui-disabled {
+  opacity: 0.7;
+}
+
+/* Accuracy chip styling */
+.location-picker .MuiChip-root {
+  font-size: 0.75rem;
+}
+
+/* Permission alert styling */
+.location-picker .MuiAlert-root {
+  border-radius: 8px;
+}
+
+/* Location icon container */
+.location-picker .location-icon-container {
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+}
+
+/* Responsive coordinate display */
+@media (max-width: 480px) {
+  .location-picker .MuiChip-label {
+    font-size: 0.7rem;
+    padding: 0 6px;
+  }
+}
+
+/* High accuracy indicator */
+.location-picker .accuracy-high {
+  color: #4caf50;
+}
+
+.location-picker .accuracy-medium {
+  color: #ff9800;
+}
+
+.location-picker .accuracy-low {
+  color: #f44336;
+}
+
+/* Map button hover effect */
+.location-picker .map-button:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+}
+
+/* Share button emphasis */
+.location-picker .share-button {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.location-picker .share-button:hover {
+  background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}

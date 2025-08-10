@@ -1,0 +1,138 @@
+.virtualized-message-list {
+  position: relative;
+  height: 100%;
+  background: var(--chat-background, #f0f0f0);
+}
+
+.virtualized-scroll-container {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+.virtualized-content {
+  position: relative;
+  min-height: 100%;
+}
+
+.virtualized-message-item {
+  padding: 4px 16px;
+  transition: opacity 0.2s ease;
+}
+
+.virtualized-message-item.own {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.virtualized-message-item.other {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--text-secondary, #666);
+  font-size: 14px;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color, #ddd);
+  border-top: 2px solid var(--primary-color, #007bff);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Typing indicator container */
+.typing-indicator-container {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Scroll to bottom button */
+.scroll-to-bottom-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color, #007bff);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.scroll-to-bottom-btn:hover {
+  background: var(--primary-color-dark, #0056b3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-bottom-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .virtualized-message-item {
+    padding: 4px 12px;
+  }
+  
+  .scroll-to-bottom-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Performance optimizations */
+.virtualized-scroll-container {
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.virtualized-message-item {
+  /* Optimize for animations */
+  will-change: transform, opacity;
+  contain: layout style paint;
+}
+
+/* Smooth scrolling for better UX */
+.virtualized-scroll-container.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 768px) {
+  .virtualized-scroll-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .virtualized-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+}

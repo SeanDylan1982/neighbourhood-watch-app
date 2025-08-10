@@ -1,0 +1,165 @@
+/* ContactPicker Component Styles */
+
+.contact-picker {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Contact list scrollbar styling */
+.contact-picker .MuiBox-root:has(.MuiList-root) {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.contact-picker .MuiBox-root:has(.MuiList-root)::-webkit-scrollbar {
+  width: 6px;
+}
+
+.contact-picker .MuiBox-root:has(.MuiList-root)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.contact-picker .MuiBox-root:has(.MuiList-root)::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.contact-picker .MuiBox-root:has(.MuiList-root)::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Contact item hover effects */
+.contact-picker .MuiListItemButton-root {
+  transition: all 0.2s ease-in-out;
+}
+
+.contact-picker .MuiListItemButton-root:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar online indicator animation */
+.contact-picker .MuiAvatar-root + .MuiBox-root {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Search input focus styling */
+.contact-picker .MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-width: 2px;
+}
+
+/* Contact preview card styling */
+.contact-picker .MuiCard-root {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.contact-picker .MuiCard-root:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Chip styling for contact types */
+.contact-picker .MuiChip-root {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Button styling */
+.contact-picker .MuiButton-root {
+  text-transform: none;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+/* Loading spinner centering */
+.contact-picker .MuiCircularProgress-root {
+  color: #1976d2;
+}
+
+/* Alert styling */
+.contact-picker .MuiAlert-root {
+  border-radius: 8px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .contact-picker {
+    padding: 0;
+  }
+  
+  .contact-picker .MuiListItem-root {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .contact-picker .MuiListItemButton-root {
+    border-radius: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .contact-picker .MuiAvatar-root {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .contact-picker .MuiChip-root {
+    height: 18px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .contact-picker .MuiBox-root:has(.MuiList-root)::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .contact-picker .MuiBox-root:has(.MuiList-root)::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .contact-picker .MuiListItemButton-root:hover {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  }
+  
+  .contact-picker .MuiCard-root:hover {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Accessibility improvements */
+.contact-picker .MuiListItemButton-root:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.contact-picker .MuiIconButton-root:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* Animation for contact type chips */
+.contact-picker .MuiChip-root {
+  transition: all 0.2s ease-in-out;
+}
+
+.contact-picker .MuiChip-root:hover {
+  transform: scale(1.05);
+}
+
+/* Smooth transitions for all interactive elements */
+.contact-picker * {
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}

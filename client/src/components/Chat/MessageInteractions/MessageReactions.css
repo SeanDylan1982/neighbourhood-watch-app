@@ -1,0 +1,446 @@
+.message-reactions {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  gap: 2px;
+}
+
+.reactions-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.reaction-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  background: #f0f2f5;
+  border: 1px solid #e4e6ea;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 24px;
+  overflow: hidden;
+  user-select: none;
+}
+
+.reaction-badge:hover {
+  background: #e8f4fd;
+  border-color: #1877f2;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reaction-badge:active {
+  transform: scale(0.95);
+}
+
+.reaction-badge.user-reacted {
+  background: #e7f3ff;
+  border-color: #1877f2;
+  color: #1877f2;
+}
+
+.reaction-badge.user-reacted:hover {
+  background: #d0e9ff;
+  border-color: #166fe5;
+}
+
+.reaction-badge.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.reaction-badge.disabled:hover {
+  transform: none;
+  background: #f0f2f5;
+  border-color: #e4e6ea;
+  box-shadow: none;
+}
+
+.reaction-emoji {
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reaction-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: inherit;
+  min-width: 8px;
+  text-align: center;
+}
+
+.reaction-animation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(24, 119, 242, 0.1);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.reaction-badge:active .reaction-animation-overlay {
+  opacity: 1;
+}
+
+.hidden-reactions-indicator {
+  font-size: 11px;
+  color: #65676b;
+  padding: 2px 4px;
+  background: #f0f2f5;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Size variants */
+.message-reactions.small .reaction-badge {
+  padding: 1px 4px;
+  min-height: 20px;
+  border-radius: 10px;
+}
+
+.message-reactions.small .reaction-emoji {
+  font-size: 12px;
+}
+
+.message-reactions.small .reaction-count {
+  font-size: 10px;
+}
+
+.message-reactions.large .reaction-badge {
+  padding: 4px 8px;
+  min-height: 28px;
+  border-radius: 14px;
+}
+
+.message-reactions.large .reaction-emoji {
+  font-size: 16px;
+}
+
+.message-reactions.large .reaction-count {
+  font-size: 12px;
+}
+
+/* Style variants */
+.message-reactions.compact {
+  gap: 1px;
+}
+
+.message-reactions.compact .reactions-container {
+  gap: 2px;
+}
+
+.message-reactions.compact .reaction-badge {
+  padding: 1px 4px;
+  gap: 2px;
+}
+
+.message-reactions.minimal .reaction-badge {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+}
+
+.message-reactions.minimal .reaction-badge:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+.message-reactions.minimal .reaction-badge.user-reacted {
+  background: rgba(24, 119, 242, 0.1);
+  border: none;
+}
+
+/* Tooltip styles */
+.reaction-tooltip {
+  font-family: inherit;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Animation for reaction changes */
+@keyframes reactionPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.reaction-badge.animating {
+  animation: reactionPulse 0.3s ease;
+}
+
+@keyframes reactionAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.reaction-badge.appearing {
+  animation: reactionAppear 0.3s ease;
+}
+
+@keyframes reactionDisappear {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.reaction-badge.disappearing {
+  animation: reactionDisappear 0.3s ease;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .reaction-badge {
+    background: #3a3b3c;
+    border-color: #4e4f50;
+    color: #e4e6ea;
+  }
+  
+  .reaction-badge:hover {
+    background: #4267b2;
+    border-color: #5890ff;
+  }
+  
+  .reaction-badge.user-reacted {
+    background: #263951;
+    border-color: #5890ff;
+    color: #5890ff;
+  }
+  
+  .reaction-badge.user-reacted:hover {
+    background: #1e2a3a;
+    border-color: #4267b2;
+  }
+  
+  .hidden-reactions-indicator {
+    background: #3a3b3c;
+    color: #b0b3b8;
+  }
+  
+  .message-reactions.minimal .reaction-badge:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .message-reactions.minimal .reaction-badge.user-reacted {
+    background: rgba(88, 144, 255, 0.2);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .reaction-badge {
+    padding: 3px 7px;
+    min-height: 26px;
+    gap: 4px;
+  }
+  
+  .reaction-emoji {
+    font-size: 15px;
+  }
+  
+  .reaction-count {
+    font-size: 12px;
+  }
+  
+  .message-reactions.small .reaction-badge {
+    padding: 2px 5px;
+    min-height: 22px;
+  }
+  
+  .message-reactions.small .reaction-emoji {
+    font-size: 13px;
+  }
+  
+  .message-reactions.small .reaction-count {
+    font-size: 11px;
+  }
+  
+  /* Increase touch target size */
+  .reaction-badge {
+    min-width: 32px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .reaction-badge {
+    background: #fff;
+    border: 2px solid #000;
+    color: #000;
+  }
+  
+  .reaction-badge:hover {
+    background: #000;
+    color: #fff;
+  }
+  
+  .reaction-badge.user-reacted {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+  }
+  
+  .reaction-badge.user-reacted:hover {
+    background: #fff;
+    color: #000;
+    border-color: #000;
+  }
+  
+  .hidden-reactions-indicator {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reaction-badge {
+    transition: none;
+  }
+  
+  .reaction-badge:hover {
+    transform: none;
+  }
+  
+  .reaction-badge:active {
+    transform: none;
+  }
+  
+  .reaction-animation-overlay {
+    transition: none;
+  }
+  
+  .reaction-badge.animating {
+    animation: none;
+  }
+  
+  .reaction-badge.appearing {
+    animation: none;
+  }
+  
+  .reaction-badge.disappearing {
+    animation: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.reaction-badge:focus-visible {
+  outline: 2px solid #1877f2;
+  outline-offset: 2px;
+}
+
+/* RTL support */
+[dir="rtl"] .reactions-container {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .reaction-badge {
+  flex-direction: row-reverse;
+}
+
+/* Print styles */
+@media print {
+  .message-reactions {
+    display: none;
+  }
+}
+
+/* Loading state */
+.message-reactions.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.message-reactions.loading .reaction-badge {
+  background: linear-gradient(90deg, #f0f2f5 25%, #e4e6ea 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Error state */
+.message-reactions.error .reaction-badge {
+  background: #ffebee;
+  border-color: #f44336;
+  color: #c62828;
+}
+
+/* Empty state */
+.message-reactions:empty {
+  display: none;
+}
+
+/* Hover effects for desktop */
+@media (hover: hover) and (pointer: fine) {
+  .reaction-badge:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Touch interactions */
+@media (hover: none) and (pointer: coarse) {
+  .reaction-badge:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .reaction-badge:active {
+    background: #e8f4fd;
+    border-color: #1877f2;
+  }
+  
+  .reaction-badge.user-reacted:active {
+    background: #d0e9ff;
+    border-color: #166fe5;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+  .reaction-badge {
+    padding: 3px 8px;
+  }
+  
+  .reactions-container {
+    gap: 6px;
+  }
+}

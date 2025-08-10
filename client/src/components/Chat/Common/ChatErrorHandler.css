@@ -1,0 +1,317 @@
+.chat-error-handler {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Error boundary fallback styles */
+.chat-error-handler__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 20px;
+  background-color: var(--bg-primary, #ffffff);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e1e5e9);
+}
+
+.chat-error-handler__fallback-content {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.chat-error-handler__fallback-icon {
+  color: var(--error-color, #dc3545);
+  margin-bottom: 16px;
+}
+
+.chat-error-handler__fallback-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.chat-error-handler__fallback-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0 0 8px 0;
+}
+
+.chat-error-handler__fallback-message {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.chat-error-handler__fallback-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.chat-error-handler__fallback-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  min-width: 100px;
+}
+
+.chat-error-handler__fallback-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chat-error-handler__fallback-button--primary {
+  background-color: var(--primary-color, #007bff);
+  color: white;
+  border-color: var(--primary-color, #007bff);
+}
+
+.chat-error-handler__fallback-button--primary:hover:not(:disabled) {
+  background-color: var(--primary-hover, #0056b3);
+  border-color: var(--primary-hover, #0056b3);
+}
+
+.chat-error-handler__fallback-button--secondary {
+  background-color: transparent;
+  color: var(--text-secondary, #6b7280);
+  border-color: var(--border-color, #e1e5e9);
+}
+
+.chat-error-handler__fallback-button--secondary:hover {
+  background-color: var(--bg-secondary, #f8f9fa);
+  color: var(--text-primary, #1a1a1a);
+}
+
+.chat-error-handler__fallback-retry-info {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #9ca3af);
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.chat-error-handler__fallback-details {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.chat-error-handler__fallback-details summary {
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.chat-error-handler__fallback-error-info {
+  background-color: var(--bg-secondary, #f8f9fa);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 0.75rem;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.chat-error-handler__fallback-error-info p {
+  margin: 4px 0;
+  word-break: break-word;
+}
+
+.chat-error-handler__fallback-error-info strong {
+  color: var(--text-primary, #1a1a1a);
+}
+
+/* Error recovery panel styles */
+.chat-error-handler__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: var(--bg-primary, #ffffff);
+  border-bottom: 1px solid var(--border-color, #e1e5e9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Floating error indicator */
+.chat-error-handler__indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1001;
+}
+
+.chat-error-handler__indicator-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--error-color, #dc3545);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.chat-error-handler__indicator-button:hover {
+  background-color: var(--error-hover, #c82333);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.chat-error-handler__indicator-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.chat-error-handler__indicator-count {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Animation for error indicator */
+@keyframes errorPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.chat-error-handler__indicator-button {
+  animation: errorPulse 2s infinite;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .chat-error-handler__fallback {
+    padding: 16px;
+    min-height: 250px;
+  }
+
+  .chat-error-handler__fallback-content {
+    max-width: 100%;
+  }
+
+  .chat-error-handler__fallback-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chat-error-handler__fallback-button {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .chat-error-handler__panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-primary, #ffffff);
+    border: none;
+    box-shadow: none;
+    overflow-y: auto;
+  }
+
+  .chat-error-handler__indicator {
+    bottom: 80px; /* Account for mobile navigation */
+    right: 16px;
+  }
+
+  .chat-error-handler__indicator-button {
+    padding: 6px 10px;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chat-error-handler__fallback {
+    background-color: var(--bg-primary-dark, #1a1a1a);
+    border-color: var(--border-color-dark, #333333);
+  }
+
+  .chat-error-handler__fallback-title {
+    color: var(--text-primary-dark, #ffffff);
+  }
+
+  .chat-error-handler__fallback-message {
+    color: var(--text-secondary-dark, #b3b3b3);
+  }
+
+  .chat-error-handler__fallback-button--secondary {
+    color: var(--text-secondary-dark, #b3b3b3);
+    border-color: var(--border-color-dark, #333333);
+  }
+
+  .chat-error-handler__fallback-button--secondary:hover {
+    background-color: var(--bg-secondary-dark, #2a2a2a);
+    color: var(--text-primary-dark, #ffffff);
+  }
+
+  .chat-error-handler__fallback-error-info {
+    background-color: var(--bg-secondary-dark, #2a2a2a);
+    border-color: var(--border-color-dark, #333333);
+    color: var(--text-primary-dark, #ffffff);
+  }
+
+  .chat-error-handler__panel {
+    background-color: var(--bg-primary-dark, #1a1a1a);
+    border-color: var(--border-color-dark, #333333);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .chat-error-handler__fallback {
+    border-width: 2px;
+  }
+
+  .chat-error-handler__fallback-button {
+    border-width: 2px;
+  }
+
+  .chat-error-handler__indicator-button {
+    border: 2px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .chat-error-handler__fallback-button,
+  .chat-error-handler__indicator-button {
+    transition: none;
+  }
+
+  .chat-error-handler__indicator-button {
+    animation: none;
+  }
+
+  .chat-error-handler__indicator-button:hover {
+    transform: none;
+  }
+}

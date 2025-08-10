@@ -1,0 +1,122 @@
+.encryption-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.encryption-status[role="button"] {
+  cursor: pointer;
+}
+
+.encryption-status[role="button"]:hover {
+  opacity: 0.8;
+}
+
+.encryption-status[role="button"]:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 1px;
+}
+
+/* Size variants */
+.encryption-status--small {
+  font-size: 10px;
+  padding: 1px 4px;
+  gap: 2px;
+}
+
+.encryption-status--medium {
+  font-size: 12px;
+  padding: 2px 6px;
+  gap: 4px;
+}
+
+.encryption-status--large {
+  font-size: 14px;
+  padding: 4px 8px;
+  gap: 6px;
+}
+
+/* Status variants */
+.encryption-status--enabled {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.encryption-status--checking {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.encryption-status--disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.encryption-status--error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.encryption-status__icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1em;
+}
+
+.encryption-status__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .encryption-status--enabled {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border-color: rgba(40, 167, 69, 0.3);
+  }
+
+  .encryption-status--checking {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border-color: rgba(255, 193, 7, 0.3);
+  }
+
+  .encryption-status--disabled {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #adb5bd;
+    border-color: rgba(108, 117, 125, 0.3);
+  }
+
+  .encryption-status--error {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border-color: rgba(220, 53, 69, 0.3);
+  }
+}
+
+/* Animation for checking status */
+.encryption-status--checking .encryption-status__icon {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

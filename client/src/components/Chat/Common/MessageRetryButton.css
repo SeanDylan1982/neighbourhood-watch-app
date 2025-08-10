@@ -1,0 +1,124 @@
+.message-retry-button {
+  background: var(--danger-background, #f8d7da);
+  border: 1px solid var(--danger-border, #f5c6cb);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.retry-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.retry-icon {
+  color: var(--danger-color, #dc3545);
+  flex-shrink: 0;
+}
+
+.retry-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.retry-label {
+  display: block;
+  font-weight: 500;
+  color: var(--danger-color, #dc3545);
+  margin-bottom: 2px;
+}
+
+.retry-error {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  word-break: break-word;
+}
+
+.retry-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.retry-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn {
+  background: var(--primary-color, #007bff);
+  color: white;
+}
+
+.retry-btn:hover {
+  background: var(--primary-color-dark, #0056b3);
+}
+
+.remove-btn {
+  background: var(--danger-color, #dc3545);
+  color: white;
+}
+
+.remove-btn:hover {
+  background: var(--danger-color-dark, #c82333);
+}
+
+.retry-action-btn:active {
+  transform: translateY(1px);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .retry-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .retry-actions {
+    justify-content: center;
+  }
+
+  .retry-action-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Animation */
+.message-retry-button {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .message-retry-button {
+    border-width: 2px;
+  }
+
+  .retry-action-btn {
+    border: 1px solid currentColor;
+  }
+}

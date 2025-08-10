@@ -1,0 +1,339 @@
+.reply-preview {
+  position: relative;
+  background: #f8f9fa;
+  border-left: 4px solid #2196f3;
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reply-preview:hover {
+  background: #f0f2f5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.reply-preview-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+}
+
+.reply-connection-line {
+  width: 3px;
+  background: linear-gradient(to bottom, #2196f3, transparent);
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 100%;
+}
+
+.reply-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.reply-sender {
+  font-weight: 600;
+  color: #2196f3;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-close-button {
+  padding: 2px;
+  color: #666;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.reply-close-button:hover {
+  opacity: 1;
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.reply-excerpt {
+  color: #555;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-size: 13px;
+}
+
+/* Variant styles */
+.reply-preview.compact {
+  padding: 8px 12px;
+  margin: 4px 0;
+}
+
+.reply-preview.compact .reply-header {
+  margin-bottom: 2px;
+}
+
+.reply-preview.compact .reply-sender {
+  font-size: 12px;
+}
+
+.reply-preview.compact .reply-excerpt {
+  font-size: 12px;
+}
+
+.reply-preview.inline {
+  display: inline-flex;
+  margin: 0 4px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(33, 150, 243, 0.1);
+  border-left: 2px solid #2196f3;
+}
+
+.reply-preview.inline .reply-preview-content {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.reply-preview.inline .reply-connection-line {
+  display: none;
+}
+
+.reply-preview.inline .reply-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reply-preview.inline .reply-header {
+  margin-bottom: 0;
+}
+
+.reply-preview.inline .reply-sender {
+  font-size: 12px;
+}
+
+.reply-preview.inline .reply-excerpt {
+  font-size: 12px;
+}
+
+/* Position variants */
+.reply-preview.bottom {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.reply-preview.top {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+/* Media type indicators */
+.reply-excerpt:has-text("🖼️"),
+.reply-excerpt:has-text("🎥"),
+.reply-excerpt:has-text("🎙️"),
+.reply-excerpt:has-text("📄"),
+.reply-excerpt:has-text("📍"),
+.reply-excerpt:has-text("👤") {
+  font-style: italic;
+  color: #666;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .reply-preview {
+    background: #2d2d2d;
+    border-left-color: #64b5f6;
+    color: #e0e0e0;
+  }
+  
+  .reply-preview:hover {
+    background: #333;
+  }
+  
+  .reply-sender {
+    color: #90caf9;
+  }
+  
+  .reply-excerpt {
+    color: #ccc;
+  }
+  
+  .reply-close-button {
+    color: #999;
+  }
+  
+  .reply-close-button:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+  }
+  
+  .reply-preview.inline {
+    background: rgba(144, 202, 249, 0.1);
+    border-left-color: #64b5f6;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .reply-preview {
+    padding: 10px;
+    margin: 6px 0;
+  }
+  
+  .reply-sender {
+    font-size: 12px;
+  }
+  
+  .reply-excerpt {
+    font-size: 12px;
+  }
+  
+  .reply-close-button {
+    padding: 4px;
+  }
+  
+  .reply-preview.compact {
+    padding: 6px 10px;
+  }
+  
+  .reply-preview.inline {
+    padding: 4px 8px;
+    margin: 0 2px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .reply-preview {
+    background: #fff;
+    border: 2px solid #000;
+    border-left: 6px solid #000;
+  }
+  
+  .reply-sender {
+    color: #000;
+    font-weight: bold;
+  }
+  
+  .reply-excerpt {
+    color: #000;
+  }
+  
+  .reply-close-button {
+    color: #000;
+    border: 1px solid #000;
+  }
+  
+  .reply-close-button:hover {
+    background: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reply-preview {
+    transition: none;
+  }
+  
+  .reply-close-button {
+    transition: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.reply-preview:focus-within {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+.reply-close-button:focus-visible {
+  outline: 2px solid #2196f3;
+  outline-offset: 1px;
+}
+
+/* Animation for when reply preview appears */
+@keyframes replyPreviewSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 100px;
+  }
+}
+
+.reply-preview {
+  animation: replyPreviewSlideIn 0.3s ease-out;
+}
+
+/* Loading state */
+.reply-preview.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.reply-preview.loading .reply-excerpt {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Error state */
+.reply-preview.error {
+  border-left-color: #f44336;
+  background: #ffebee;
+}
+
+.reply-preview.error .reply-sender {
+  color: #f44336;
+}
+
+.reply-preview.error .reply-excerpt {
+  color: #c62828;
+  font-style: italic;
+}
+
+/* RTL support */
+[dir="rtl"] .reply-preview {
+  border-left: none;
+  border-right: 4px solid #2196f3;
+}
+
+[dir="rtl"] .reply-connection-line {
+  background: linear-gradient(to bottom, #2196f3, transparent);
+}
+
+[dir="rtl"] .reply-preview.inline {
+  border-left: none;
+  border-right: 2px solid #2196f3;
+}

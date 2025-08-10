@@ -1,0 +1,138 @@
+.progressive-image {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.progressive-image__thumbnail,
+.progressive-image__main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.progressive-image__thumbnail {
+  opacity: 1;
+  filter: blur(2px);
+  transform: scale(1.05); /* Slightly larger to hide blur edges */
+}
+
+.progressive-image__thumbnail--hidden {
+  opacity: 0;
+}
+
+.progressive-image__main {
+  opacity: 0;
+}
+
+.progressive-image__main--visible {
+  opacity: 1;
+}
+
+.progressive-image__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.progressive-image__error-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+.progressive-image__error-text {
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.progressive-image__loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.progressive-image__spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e9ecef;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: progressive-image-spin 1s linear infinite;
+}
+
+@keyframes progressive-image-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive sizing */
+.progressive-image--small {
+  width: 150px;
+  height: 150px;
+}
+
+.progressive-image--medium {
+  width: 300px;
+  height: 300px;
+}
+
+.progressive-image--large {
+  width: 600px;
+  height: 400px;
+}
+
+.progressive-image--full {
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+}
+
+/* Chat-specific styles */
+.progressive-image--chat-thumbnail {
+  width: 200px;
+  height: 150px;
+  border-radius: 12px;
+  margin: 4px 0;
+}
+
+.progressive-image--chat-full {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 12px;
+  margin: 4px 0;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .progressive-image {
+    background-color: #2d3748;
+  }
+  
+  .progressive-image__error {
+    background-color: #2d3748;
+    color: #a0aec0;
+    border-color: #4a5568;
+  }
+  
+  .progressive-image__spinner {
+    border-color: #4a5568;
+    border-top-color: #63b3ed;
+  }
+}

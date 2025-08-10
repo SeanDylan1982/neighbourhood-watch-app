@@ -1,0 +1,211 @@
+/* DocumentUpload Component Styles */
+
+.document-upload {
+  width: 100%;
+}
+
+.document-upload .upload-area {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.document-upload .upload-area:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+}
+
+.document-upload .upload-area.drag-over {
+  background-color: rgba(25, 118, 210, 0.08);
+  border-color: #1976d2;
+}
+
+.document-upload .upload-area.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.document-upload .file-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.document-upload .file-item {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.document-upload .file-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.document-upload .file-icon {
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.document-upload .file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-upload .file-name {
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.document-upload .file-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.document-upload .file-chip {
+  font-size: 0.75rem;
+  height: 20px;
+}
+
+.document-upload .progress-container {
+  margin-top: 8px;
+}
+
+.document-upload .progress-bar {
+  height: 4px;
+  border-radius: 2px;
+}
+
+.document-upload .progress-text {
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+.document-upload .status-icon {
+  margin-left: 8px;
+}
+
+.document-upload .remove-button {
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.document-upload .remove-button:hover {
+  opacity: 1;
+}
+
+.document-upload .summary-box {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.document-upload .summary-text {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.document-upload .error-alert {
+  margin-bottom: 16px;
+}
+
+.document-upload .supported-types {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .document-upload .file-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .document-upload .file-chip {
+    align-self: flex-start;
+  }
+  
+  .document-upload .upload-area {
+    padding: 24px 16px;
+  }
+  
+  .document-upload .summary-box {
+    padding: 12px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .document-upload .summary-box {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .document-upload .summary-text {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .document-upload .supported-types {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Animation for file list items */
+.document-upload .file-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Upload progress animation */
+.document-upload .progress-bar .MuiLinearProgress-bar {
+  transition: transform 0.4s ease-in-out;
+}
+
+/* File type specific colors */
+.document-upload .file-type-pdf {
+  color: #d32f2f;
+}
+
+.document-upload .file-type-word {
+  color: #1976d2;
+}
+
+.document-upload .file-type-excel {
+  color: #388e3c;
+}
+
+.document-upload .file-type-powerpoint {
+  color: #f57c00;
+}
+
+.document-upload .file-type-archive {
+  color: #ff9800;
+}
+
+.document-upload .file-type-code {
+  color: #9c27b0;
+}
+
+.document-upload .file-type-text {
+  color: #757575;
+}
+
+/* Accessibility improvements */
+.document-upload .upload-area:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.document-upload .remove-button:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}

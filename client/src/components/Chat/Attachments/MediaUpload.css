@@ -1,0 +1,402 @@
+/* MediaUpload Component Styles */
+
+.media-upload {
+  width: 100%;
+}
+
+.media-upload__drop-zone {
+  border: 2px dashed var(--border-color, #e0e0e0);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  background-color: var(--background-paper, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.media-upload__drop-zone:hover {
+  border-color: var(--primary-main, #1976d2);
+  background-color: var(--primary-light, rgba(25, 118, 210, 0.04));
+}
+
+.media-upload__drop-zone--drag-over {
+  border-color: var(--primary-main, #1976d2);
+  background-color: var(--primary-light, rgba(25, 118, 210, 0.08));
+  transform: scale(1.02);
+}
+
+.media-upload__drop-zone--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.media-upload__icon {
+  font-size: 48px;
+  color: var(--text-secondary, #757575);
+  margin-bottom: 16px;
+  transition: color 0.2s ease-in-out;
+}
+
+.media-upload__drop-zone:hover .media-upload__icon {
+  color: var(--primary-main, #1976d2);
+}
+
+.media-upload__title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary, #212121);
+  margin-bottom: 8px;
+}
+
+.media-upload__subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #757575);
+  margin-bottom: 4px;
+}
+
+.media-upload__info {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #757575);
+}
+
+.media-upload__file-input {
+  display: none;
+}
+
+.media-upload__error {
+  margin-bottom: 16px;
+}
+
+.media-upload__files {
+  margin-top: 16px;
+}
+
+.media-upload__files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.media-upload__files-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary, #212121);
+}
+
+.media-upload__clear-button {
+  font-size: 0.875rem;
+  color: var(--error-main, #d32f2f);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.media-upload__clear-button:hover {
+  background-color: var(--error-light, rgba(211, 47, 47, 0.04));
+}
+
+.media-upload__file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.media-upload__file-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--background-paper, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.media-upload__file-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.media-upload__file-preview {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.media-upload__file-placeholder {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--grey-100, #f5f5f5);
+  color: var(--text-secondary, #757575);
+}
+
+.media-upload__file-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.media-upload__compression-indicator {
+  text-align: center;
+  color: white;
+}
+
+.media-upload__compression-spinner {
+  margin-bottom: 8px;
+}
+
+.media-upload__compression-text {
+  font-size: 0.75rem;
+}
+
+.media-upload__progress-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  z-index: 2;
+}
+
+.media-upload__progress-bar {
+  margin-bottom: 4px;
+}
+
+.media-upload__progress-text {
+  font-size: 0.75rem;
+  color: white;
+}
+
+.media-upload__remove-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.media-upload__remove-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.media-upload__video-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-upload__video-play-icon {
+  color: white;
+  font-size: 32px;
+}
+
+.media-upload__file-info {
+  padding: 8px;
+}
+
+.media-upload__file-name {
+  font-size: 0.875rem;
+  color: var(--text-primary, #212121);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+
+.media-upload__file-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.media-upload__file-size {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #757575);
+  background-color: var(--grey-100, #f5f5f5);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--grey-300, #e0e0e0);
+}
+
+.media-upload__compression-badge {
+  font-size: 0.75rem;
+  color: var(--success-main, #2e7d32);
+  background-color: var(--success-light, rgba(46, 125, 50, 0.08));
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--success-main, #2e7d32);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.media-upload__compression-icon {
+  font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .media-upload__file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  
+  .media-upload__drop-zone {
+    padding: 16px;
+  }
+  
+  .media-upload__icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  
+  .media-upload__title {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .media-upload__file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  
+  .media-upload__file-card {
+    border-radius: 6px;
+  }
+  
+  .media-upload__file-preview {
+    height: 100px;
+  }
+  
+  .media-upload__file-placeholder {
+    height: 100px;
+  }
+  
+  .media-upload__files-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .media-upload__drop-zone {
+    background-color: var(--background-paper-dark, #1e1e1e);
+    border-color: var(--border-color-dark, #424242);
+  }
+  
+  .media-upload__drop-zone:hover {
+    background-color: var(--primary-light-dark, rgba(144, 202, 249, 0.08));
+  }
+  
+  .media-upload__file-card {
+    background-color: var(--background-paper-dark, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .media-upload__file-placeholder {
+    background-color: var(--grey-800, #424242);
+  }
+  
+  .media-upload__file-size {
+    background-color: var(--grey-800, #424242);
+    border-color: var(--grey-600, #757575);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .media-upload__drop-zone {
+    border-width: 3px;
+  }
+  
+  .media-upload__file-card {
+    border: 2px solid var(--text-primary, #212121);
+  }
+  
+  .media-upload__remove-button {
+    border: 2px solid white;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .media-upload__drop-zone,
+  .media-upload__file-card,
+  .media-upload__remove-button,
+  .media-upload__clear-button {
+    transition: none;
+  }
+  
+  .media-upload__drop-zone--drag-over {
+    transform: none;
+  }
+}
+
+/* Animation for file upload progress */
+@keyframes uploadPulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.media-upload__file-card--uploading {
+  animation: uploadPulse 2s ease-in-out infinite;
+}
+
+/* Compression animation */
+@keyframes compressionSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.media-upload__compression-spinner {
+  animation: compressionSpin 1s linear infinite;
+}

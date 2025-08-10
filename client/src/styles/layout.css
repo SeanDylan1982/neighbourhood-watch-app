@@ -1,0 +1,67 @@
+/* Layout utilities for consistent sizing */
+
+/* Ensure the app takes full viewport height */
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main app container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header compensation */
+.app-body {
+  flex: 1;
+  overflow: auto;
+  /* Account for header height */
+  height: calc(100vh - 64px); /* 64px is standard AppBar height */
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .app-body {
+    /* Account for header and bottom navigation */
+    height: calc(100vh - 64px - 56px); /* 56px is bottom nav height */
+    padding-bottom: 0;
+  }
+}
+
+/* Responsive layout helpers */
+.layout-full-height {
+  height: 100vh;
+}
+
+.layout-content-height {
+  height: calc(100vh - 64px);
+}
+
+.layout-mobile-content-height {
+  height: calc(100vh - 64px - 56px);
+}
+
+/* Scrollable content areas */
+.scrollable-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Prevent content from going behind fixed elements */
+.content-safe-area {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure proper spacing for floating action buttons */
+.fab-safe-area {
+  padding-bottom: 80px; /* Space for FAB */
+}
+
+@media (max-width: 768px) {
+  .fab-safe-area {
+    padding-bottom: 136px; /* Space for FAB + bottom nav */
+  }
+}
