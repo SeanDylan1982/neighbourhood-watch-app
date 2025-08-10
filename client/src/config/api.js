@@ -1,8 +1,14 @@
 // API Configuration
 const getApiUrl = () => {
-  // In production, use the Railway URL
+  // Force Railway URL in production
   if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_API_URL || 'https://web-production-d1da2.up.railway.app';
+    // Always use Railway URL in production, ignore any localhost values
+    const envUrl = process.env.REACT_APP_API_URL;
+    if (envUrl && !envUrl.includes('localhost')) {
+      return envUrl;
+    }
+    // Fallback to Railway URL if environment variable is localhost or missing
+    return 'https://web-production-d1da2.up.railway.app';
   }
   
   // In development, use localhost
