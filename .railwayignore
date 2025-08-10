@@ -1,0 +1,12 @@
+# Ignore client directory for backend-only deployment
+client/
+.kiro/
+*.md
+.git/
+.github/
+test-*.js
+debug-*.js
+create-*.js
+promote-*.js
+instant-*.js
+browser-*.js
