@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 // Configure axios base URL
-// Force the base URL to be exactly http://localhost:5001
-axios.defaults.baseURL = 'http://localhost:5001';
+// Use environment variable or fallback to localhost for development
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
   
 // Add request/response interceptors for debugging
 axios.interceptors.request.use(request => {
