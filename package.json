@@ -4,11 +4,11 @@
   "description": "neibrly - Connect with your neighbors. A neighborhood community platform.",
   "main": "server/index.js",
   "scripts": {
-    "start": "node start-app.js",
+    "start": "cd server && node railway-start.js",
+    "build": "echo 'Backend-only deployment - no build step needed'",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "build": "cd client && npm run build",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install",
     "reset": "node scripts/port-manager.js reset",
     "kill": "node scripts/port-manager.js kill",

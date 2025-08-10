@@ -10,3 +10,5 @@ create-*.js
 promote-*.js
 instant-*.js
 browser-*.js
+RAILWAY_DEPLOYMENT.md
+README.md
