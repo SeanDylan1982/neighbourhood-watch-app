@@ -41,6 +41,7 @@ DB_READ_PREFERENCE=primaryPreferred
 ### 3. Configure Build Settings
 
 Railway should automatically:
+
 - Detect the Node.js environment
 - Install dependencies with `npm install`
 - Start the server with `npm start`
@@ -63,6 +64,7 @@ Railway will automatically deploy when you push to your main branch.
 ### 2. Configure Build Settings
 
 In Vercel project settings:
+
 - **Framework Preset**: Create React App
 - **Root Directory**: `client`
 - **Build Command**: `npm run build`
@@ -120,11 +122,13 @@ Make sure your Railway backend allows requests from your Vercel frontend URL.
 ## Custom Domains (Optional)
 
 ### Railway Custom Domain
+
 1. Go to your Railway project settings
 2. Add your custom domain
 3. Configure DNS records as instructed
 
 ### Vercel Custom Domain
+
 1. Go to your Vercel project settings
 2. Add your custom domain
 3. Configure DNS records as instructed
@@ -141,11 +145,13 @@ Make sure your Railway backend allows requests from your Vercel frontend URL.
 ## Scaling
 
 ### Railway Scaling
+
 - Railway automatically scales based on usage
 - Monitor resource usage in dashboard
 - Upgrade plan if needed
 
 ### Vercel Scaling
+
 - Vercel automatically handles frontend scaling
 - CDN distribution included
 - Monitor bandwidth usage
