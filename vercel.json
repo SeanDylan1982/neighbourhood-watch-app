@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "neibrly-client",
+  "name": "neighbourhood-watch-app",
   "builds": [
     {
       "src": "client/package.json",
@@ -13,14 +13,11 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/client/build/static/$1"
+      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/client/build/index.html"
+      "dest": "/index.html"
     }
-  ],
-  "buildCommand": "cd client && npm run build",
-  "outputDirectory": "client/build",
-  "installCommand": "cd client && npm install"
+  ]
 }
