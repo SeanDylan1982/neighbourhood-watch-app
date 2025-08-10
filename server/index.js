@@ -115,13 +115,17 @@ app.use(compression());
 
 // app.use(limiter); // DISABLED
 
-// CORS
+// CORS - Allow Vercel frontend
 app.use(
   cors({
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
       "http://localhost:3000",
       "http://127.0.0.1:3000",
+      "https://neighbourhood-watch-app.vercel.app",
+      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
+      // Allow any vercel.app subdomain for this project
+      /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/,
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
