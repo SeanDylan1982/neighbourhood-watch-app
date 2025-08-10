@@ -1,15 +1,9 @@
 {
   "version": 2,
   "name": "neighbourhood-watch-app",
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
+  "buildCommand": "cd client && CI=false npm run build",
+  "outputDirectory": "client/build",
+  "installCommand": "cd client && npm install",
   "routes": [
     {
       "src": "/static/(.*)",
