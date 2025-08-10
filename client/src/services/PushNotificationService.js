@@ -1,3 +1,5 @@
+import serviceWorkerManager from './ServiceWorkerManager.js';
+
 class PushNotificationService {
   constructor() {
     this.registration = null;
@@ -15,9 +17,18 @@ class PushNotificationService {
     }
 
     try {
-      // Register service worker
-      this.registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registered:', this.registration);
+      // Use ServiceWorkerManager for robust registration
+      const result = await serviceWorkerManager.register('/sw.js');
+      
+      if (result.success) {
+        this.registration = result.registration;
+        console.log('✅ Service Worker registered for push notifications:', this.registration);
+      } else {
+        console.warn('⚠️ Service Worker registration failed, push notifications disabled:', result.error);
+        // Continue without push notifications
+        this.isSupported = false;
+        return;
+      }
 
       // Check current permission
       this.permission = Notification.permission;
@@ -25,7 +36,8 @@ class PushNotificationService {
       // Load settings
       this.loadSettings();
     } catch (error) {
-      console.error('Service Worker registration failed:', error);
+      console.error('❌ Service Worker registration failed:', error);
+      this.isSupported = false;
     }
   }
 

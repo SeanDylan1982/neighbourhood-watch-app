@@ -1,25 +1,65 @@
 {
-  "short_name": "neibrly",
-  "name": "neibrly - Connect with your neighbors",
+  "name": "Neibrly - Connect with your neighbors",
+  "short_name": "Neibrly",
+  "description": "A neighborhood social platform for connecting with your community",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#4A90E2",
+  "background_color": "#ffffff",
+  "scope": "/",
   "icons": [
     {
-      "src": "favicon.png",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "src": "/favicon.png",
+      "sizes": "16x16 32x32 48x48",
       "type": "image/png"
     },
     {
-      "src": "favicon.png",
+      "src": "/logo192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "192x192"
+      "purpose": "any maskable"
     },
     {
-      "src": "favicon.png",
+      "src": "/logo512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-neibrly.png",
+      "sizes": "256x256",
+      "type": "image/png"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#4A90E2",
-  "background_color": "#ffffff"
+  "categories": ["social", "lifestyle"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Chat",
+      "short_name": "Chat",
+      "description": "Open chat interface",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "/logo-neibrly-small.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Notice Board",
+      "short_name": "Notices",
+      "description": "View community notices",
+      "url": "/notices",
+      "icons": [
+        {
+          "src": "/logo-neibrly-small.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
 }

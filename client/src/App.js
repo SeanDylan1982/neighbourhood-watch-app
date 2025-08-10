@@ -30,6 +30,9 @@ import { CookiesModal } from './components/Legal';
 import useCookieConsent from './hooks/useCookieConsent';
 import { ToastProvider } from './components/Common/Toast';
 import { ToastContainer } from './components/Common/Toast';
+import serviceWorkerManager from './services/ServiceWorkerManager';
+import manifestValidator from './services/ManifestValidator';
+import productionErrorHandler from './services/ProductionErrorHandler';
 
 
 const theme = createTheme({
@@ -92,9 +95,88 @@ function App() {
     closeCookieModal 
   } = useCookieConsent();
 
-  // Update document title
+  // Initialize app-level services
   useEffect(() => {
     document.title = BRAND.metadata.title;
+    
+    // Initialize service worker with error handling
+    const initServiceWorker = async () => {
+      try {
+        const result = await serviceWorkerManager.register('/sw.js');
+        if (result.success) {
+          console.log('✅ Service worker initialized successfully');
+        } else {
+          console.warn('⚠️ Service worker initialization failed:', result.error);
+          productionErrorHandler.handleServiceWorkerError(result.error, { 
+            phase: 'initialization',
+            details: result.details 
+          });
+        }
+      } catch (error) {
+        console.error('❌ Service worker initialization error:', error);
+        productionErrorHandler.handleServiceWorkerError('registration_failed', { 
+          phase: 'initialization',
+          error: error.message 
+        });
+      }
+    };
+
+    // Initialize manifest validation
+    const initManifestValidation = async () => {
+      try {
+        const validation = await manifestValidator.validateManifest();
+        if (validation.isValid) {
+          console.log('✅ Manifest validation successful');
+        } else {
+          console.warn('⚠️ Manifest validation failed:', validation.message);
+          productionErrorHandler.handleManifestError(validation.errorType, {
+            phase: 'validation',
+            message: validation.message
+          });
+          
+          // Try to fix manifest issues
+          const fixResult = await manifestValidator.fixManifestIssues();
+          if (fixResult.success) {
+            console.log('✅ Manifest issues fixed with fallback');
+          } else {
+            console.error('❌ Failed to fix manifest issues:', fixResult.error);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Manifest validation error:', error);
+        productionErrorHandler.handleManifestError('syntax_error', {
+          phase: 'validation',
+          error: error.message
+        });
+      }
+    };
+
+    // Initialize production error handling
+    const initErrorHandling = () => {
+      // Set up error notification listener
+      const handleProductionError = (event) => {
+        const { type, severity, message } = event.detail;
+        console.log(`🔔 Production error notification: ${type} (${severity}): ${message}`);
+        
+        // You can integrate with your toast notification system here
+        // For now, we'll just log it
+      };
+
+      window.addEventListener('production-error', handleProductionError);
+      
+      // Cleanup function
+      return () => {
+        window.removeEventListener('production-error', handleProductionError);
+      };
+    };
+
+    // Initialize all systems
+    const cleanupErrorHandling = initErrorHandling();
+    initServiceWorker();
+    initManifestValidation();
+
+    // Cleanup on unmount
+    return cleanupErrorHandling;
   }, []);
 
   return (
