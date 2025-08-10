@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 // Configure axios base URL
-// Use environment variable or fallback to localhost for development
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+console.log('🔧 AuthContext - API URL configured as:', API_BASE_URL);
+console.log('🔧 AuthContext - Environment:', process.env.NODE_ENV);
+axios.defaults.baseURL = API_BASE_URL;
   
 // Add request/response interceptors for debugging
 axios.interceptors.request.use(request => {
