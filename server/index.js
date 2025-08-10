@@ -97,6 +97,15 @@ app.use(
   })
 );
 
+app.use(
+  cors({
+    origin: "https://neighbourhood-watch-app.vercel.app", // your Vercel URL
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // if you use cookies/auth headers
+  })
+);
+
+app.use(express.json());
 
 // Security middleware
 app.use(helmet());
