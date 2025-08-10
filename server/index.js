@@ -56,11 +56,11 @@ const io = new Server(server, {
   cors: {
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "https://web-production-d1da2.up.railway.app",
-      "https://neighbourhood-watch-app.vercel.app",
-      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://web-production-d1da2.up.railway.app",
+        "https://neighbourhood-watch-app.vercel.app",
+        "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
       // Allow any vercel.app subdomain for this project
       /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/,
     ],
@@ -99,13 +99,16 @@ app.use(
 
 app.use(
   cors({
-    origin: "https://neighbourhood-watch-app.vercel.app", // your Vercel URL
+    origin:
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://web-production-d1da2.up.railway.app",
+      "https://neighbourhood-watch-app.vercel.app",
+      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // if you use cookies/auth headers
   })
 );
-
-app.use(express.json());
 
 // Security middleware
 app.use(helmet());
@@ -191,9 +194,11 @@ app.use((req, res, next) => {
 app.options("*", cors());
 
 const allowedOrigins = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "https://web-production-d1da2.up.railway.app",
   "https://neighbourhood-watch-app.vercel.app",
-  "http://localhost:3000", // or whatever port Vite runs on
-  "http://localhost:5001", // or whatever port Vite runs on
+  "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app" // or whatever port Vite runs on
 ];
 
 app.use(
