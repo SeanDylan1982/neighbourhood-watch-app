@@ -188,6 +188,27 @@ app.use((req, res, next) => {
   }
 });
 
+app.options("*", cors());
+
+const allowedOrigins = [
+  "https://neighbourhood-watch-app.vercel.app",
+  "http://localhost:3000", // or whatever port Vite runs on
+  "http://localhost:5001", // or whatever port Vite runs on
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
 // Body parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
