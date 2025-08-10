@@ -54,7 +54,16 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [
+      process.env.CLIENT_URL || "http://localhost:3000",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://web-production-d1da2.up.railway.app",
+      "https://neighbourhood-watch-app.vercel.app",
+      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
+      // Allow any vercel.app subdomain for this project
+      /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/,
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
@@ -62,6 +71,7 @@ const io = new Server(server, {
       "X-Requested-With",
       "Access-Control-Allow-Origin",
     ],
+    credentials: true,
   },
 });
 
@@ -69,8 +79,20 @@ app.use(
   "/uploads",
   express.static("uploads", {
     setHeaders: (res, path, stat) => {
-      res.set("Access-Control-Allow-Origin", "http://localhost:3000"); // or '*'
+      // Allow multiple origins for uploads
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://web-production-d1da2.up.railway.app",
+        "https://neighbourhood-watch-app.vercel.app",
+        "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app"
+      ];
+      const origin = res.req.headers.origin;
+      if (allowedOrigins.includes(origin) || /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/.test(origin)) {
+        res.set("Access-Control-Allow-Origin", origin);
+      }
       res.set("Access-Control-Allow-Methods", "GET");
+      res.set("Access-Control-Allow-Credentials", "true");
     },
   })
 );
@@ -115,13 +137,14 @@ app.use(compression());
 
 // app.use(limiter); // DISABLED
 
-// CORS - Allow Vercel frontend
+// CORS - Allow Vercel frontend and Railway backend
 app.use(
   cors({
     origin: [
       process.env.CLIENT_URL || "http://localhost:3000",
       "http://localhost:3000",
       "http://127.0.0.1:3000",
+      "https://web-production-d1da2.up.railway.app",
       "https://neighbourhood-watch-app.vercel.app",
       "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
       // Allow any vercel.app subdomain for this project
