@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "neighbourhood-watch-app",
-  "buildCommand": "cd client && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "client/build",
   "installCommand": "npm run install-all",
   "headers": [
