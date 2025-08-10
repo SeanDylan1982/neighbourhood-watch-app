@@ -149,6 +149,15 @@ The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5001
 
+## 🚀 Live Deployment
+
+The app is deployed using:
+- **Frontend**: Vercel (https://your-app.vercel.app)
+- **Backend**: Railway (https://your-app.railway.app)
+- **Database**: MongoDB Atlas
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+
 ## 🔧 Configuration
 
 ### Environment Variables
