@@ -1,0 +1,161 @@
+GitHub server tests:
+
+Run cd server
+
+> neibrly-server@1.0.0 test
+> vitest run
+
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v1.6.1 /home/runner/work/neighbourhood-watch-app/neighbourhood-watch-app/server
+
+ ❯ tests/databaseService.test.js  (0 test)
+ ❯ tests/errorClassification.test.js  (0 test)
+ ❯ tests/errorHandler.test.js  (0 test)
+ ❯ tests/terms.test.js  (0 test)
+ ❯ tests/moderation.test.js  (0 test)
+ ❯ tests/friends.test.js  (0 test)
+ ❯ tests/integration/connectionHealth.test.js  (0 test)
+ ❯ tests/legal-documents.test.js  (0 test)
+ ❯ tests/upload.test.js  (0 test)
+ ❯ tests/integration/dbOperationWrapper.integration.test.js  (0 test)
+ ❯ tests/search.test.js  (0 test)
+ ❯ tests/integration/databaseReliability.test.js  (0 test)
+(node:2210) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2210) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
+stdout | tests/changeStreamManager.test.js > ChangeStreamManager Integration
+All change streams closed
+
+stdout | tests/changeStreamManager.test.js > ChangeStreamManager Integration
+MongoDB disconnected
+
+ ❯ tests/dbOperationWrapper.test.js  (0 test)
+ ❯ tests/changeStreamManager.test.js  (11 tests | 5 failed | 2 skipped) 149ms
+   ❯ tests/changeStreamManager.test.js > ChangeStreamManager > should add and remove listeners
+     → jest is not defined
+   ❯ tests/changeStreamManager.test.js > ChangeStreamManager > should mock handleChange method
+     → jest is not defined
+   ❯ tests/changeStreamManager.test.js > ChangeStreamManager > should mock handleError method
+     → jest is not defined
+   ❯ tests/changeStreamManager.test.js > ChangeStreamManager > should calculate exponential backoff with jitter in reconnectStream
+     → jest is not defined
+   ❯ tests/changeStreamManager.test.js > ChangeStreamManager > should not exceed max retries in reconnectStream
+     → jest is not defined
+ ❯ tests/databaseRecoveryManager.test.js  (0 test)
+ ❯ tests/realTimeService.test.js  (0 test)
+ ❯ tests/retryUtils.test.js  (12 tests | 6 failed) 20ms
+   ❯ tests/retryUtils.test.js > Retry Utilities > classifyError > should classify authentication errors as fatal and not retryable
+     → expected 'mongodb_error_18' to be 'authentication_error' // Object.is equality
+   ❯ tests/retryUtils.test.js > Retry Utilities > withRetry > should retry failed operations up to maxRetries times
+     → jest is not defined
+   ❯ tests/retryUtils.test.js > Retry Utilities > withRetry > should not retry if shouldRetry returns false
+     → jest is not defined
+   ❯ tests/retryUtils.test.js > Retry Utilities > withRetry > should call onRetry callback before each retry
+     → jest is not defined
+   ❯ tests/retryUtils.test.js > Retry Utilities > withRetry > should throw after maxRetries attempts
+     → jest is not defined
+   ❯ tests/retryUtils.test.js > Retry Utilities > makeRetryable > should create a retryable version of a function
+     → jest is not defined
+ ❯ tests/admin.test.js  (0 test)
+ ❯ tests/circuitBreaker.test.js  (0 test)
+ ❯ tests/privateChat.test.js  (0 test)
+ ❯ tests/connectionHealthMonitor.test.js  (0 test)
+ ❯ tests/healthCheckService.test.js  (0 test)
+ ❯ tests/statsService.test.js  (10 tests | 1 failed) 4247ms
+   ❯ tests/statsService.test.js > StatsService > getUserStats > should return correct user statistics
+     → Message validation failed: senderName: Path `senderName` is required.
+ ❯ tests/models.test.js  (9 tests | 1 failed) 4205ms
+   ❯ tests/models.test.js > Enhanced Message Model > should create message with enhanced fields
+     → Message validation failed: senderName: Path `senderName` is required.
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 20 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/admin.test.js [ tests/admin.test.js ]
+Error: Cannot find module 'supertest'
+Require stack:
+- /home/runner/work/neighbourhood-watch-app/neighbourhood-watch-app/server/tests/admin.test.js
+ ❯ tests/admin.test.js:2:17
+      1| const mongoose = require('mongoose');
+      2| const request = require('supertest');
+       |                 ^
+      3| const express = require('express');
+      4| const jwt = require('jsonwebtoken');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', requireStack: [ '/home/runner/work/neighbourhood-watch-app/neighbourhood-watch-app/server/tests/admin.test.js' ] }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/33]⎯
+
+
+Error: Error: Cannot find module 'supertest'
+Require stack:
+- /home/runner/work/neighbourhood-watch-app/neighbourhood-watch-app/server/tests/admin.test.js
+ ❯ tests/admin.test.js:2:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', requireStack: [ '/home/runner/work/neighbourhood-watch-app/neighbourhood-watch-app/server/tests/admin.test.js' ] }
+
+
+    100|   describe('withRetry', () => {
+    101|     test('should retry failed operations up to maxRetries times', asyn…
+    102|       const mockOperation = jest.fn();
+       |                             ^
+    103|       mockOperation
+    104|         .mockRejectedValueOnce(new Error('Temporary failure 1'))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/33]⎯
+
+ FAIL  tests/retryUtils.test.js > Retry Utilities > withRetry > should not retry if shouldRetry returns false
+ReferenceError: jest is not defined
+ ❯ tests/retryUtils.test.js:120:29
+    118|     
+    119|     test('should not retry if shouldRetry returns false', async () => {
+    120|       const mockOperation = jest.fn();
+       |                             ^
+    121|       const nonRetryableError = new Error('Non-retryable error');
+    122|       mockOperation.mockRejectedValue(nonRetryableError);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/33]⎯
+
+ FAIL  tests/retryUtils.test.js > Retry Utilities > withRetry > should call onRetry callback before each retry
+ReferenceError: jest is not defined
+ ❯ tests/retryUtils.test.js:135:29
+    133|     
+    134|     test('should call onRetry callback before each retry', async () =>…
+    135|       const mockOperation = jest.fn();
+       |                             ^
+    136|       mockOperation
+    137|         .mockRejectedValueOnce(new Error('Temporary failure 1'))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/33]⎯
+
+ FAIL  tests/retryUtils.test.js > Retry Utilities > withRetry > should throw after maxRetries attempts
+ReferenceError: jest is not defined
+ ❯ tests/retryUtils.test.js:158:29
+    156|     
+    157|     test('should throw after maxRetries attempts', async () => {
+    158|       const mockOperation = jest.fn();
+       |                             ^
+    159|       mockOperation.mockRejectedValue(new Error('Persistent failure'));
+    160|       
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/33]⎯
+
+ FAIL  tests/retryUtils.test.js > Retry Utilities > makeRetryable > should create a retryable version of a function
+ReferenceError: jest is not defined
+ ❯ tests/retryUtils.test.js:174:22
+    172|   describe('makeRetryable', () => {
+    173|     test('should create a retryable version of a function', async () =…
+    174|       const mockFn = jest.fn();
+       |                      ^
+    175|       mockFn
+    176|         .mockRejectedValueOnce(new Error('Temporary failure'))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/33]⎯
+
+ Test Files  24 failed (24)
+      Tests  13 failed | 27 passed | 2 skipped (42)
+   Start at  18:24:29
+   Duration  7.59s (transform 527ms, setup 228ms, collect 1.78s, tests 8.62s, environment 6ms, prepare 2.55s)
+
+Error: Process completed with exit code 1.

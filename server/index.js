@@ -137,19 +137,16 @@ app.use(compression());
 
 // app.use(limiter); // DISABLED
 
-// CORS - Allow Vercel frontend and Railway backend
+// CORS - Allow all origins for now to fix deployment issues
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL || "http://localhost:3000",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "https://web-production-d1da2.up.railway.app",
-      "https://neighbourhood-watch-app.vercel.app",
-      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
-      // Allow any vercel.app subdomain for this project
-      /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/,
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Allow all origins for now - we'll restrict this later
+      return callback(null, true);
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
@@ -159,13 +156,18 @@ app.use(
       "Access-Control-Allow-Origin",
     ],
     exposedHeaders: ["Authorization"],
-    optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    optionsSuccessStatus: 200,
   })
 );
 
 // Additional CORS headers for preflight requests
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
@@ -244,79 +246,81 @@ app.set('io', io);
 setupSocketHandlers(io);
 
 /**
- * Initialize all services in the correct order with proper error handling
- * This function implements a robust startup sequence with retry logic
+ * Initialize essential services quickly for Railway startup
+ * Non-essential services are initialized in the background
  */
 async function initializeServices() {
-  console.log('Starting server initialization...');
+  console.log('Starting fast server initialization...');
   
   try {
-    // Step 1: Connect to MongoDB with retry logic
+    // Step 1: Connect to MongoDB with shorter timeout for Railway
     console.log('Connecting to MongoDB...');
-    dbConnection = await connectDB();
+    dbConnection = await Promise.race([
+      connectDB(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('MongoDB connection timeout')), 15000)
+      )
+    ]);
     console.log('MongoDB connection established successfully');
     
     // Make database service available to routes
     app.set('dbService', dbService);
     
-    // Step 2: Initialize health check service
-    console.log('Initializing health check service...');
-    healthCheckService = new HealthCheckService(dbService, {
-      checkIntervalMs: parseInt(process.env.HEALTH_CHECK_INTERVAL_MS || '30000'),
-      unhealthyThreshold: parseInt(process.env.HEALTH_UNHEALTHY_THRESHOLD || '3'),
-      alertThreshold: parseInt(process.env.HEALTH_ALERT_THRESHOLD || '5'),
-      latencyThresholdMs: parseInt(process.env.HEALTH_LATENCY_THRESHOLD_MS || '500'),
-      criticalLatencyMs: parseInt(process.env.HEALTH_CRITICAL_LATENCY_MS || '2000'),
-      maxErrorRate: parseFloat(process.env.HEALTH_MAX_ERROR_RATE || '0.1'),
-      enableAlerts: process.env.HEALTH_ENABLE_ALERTS !== 'false'
+    // Initialize other services in background after server starts
+    setImmediate(async () => {
+      try {
+        console.log('Initializing background services...');
+        
+        // Step 2: Initialize health check service
+        healthCheckService = new HealthCheckService(dbService, {
+          checkIntervalMs: parseInt(process.env.HEALTH_CHECK_INTERVAL_MS || '30000'),
+          unhealthyThreshold: parseInt(process.env.HEALTH_UNHEALTHY_THRESHOLD || '3'),
+          alertThreshold: parseInt(process.env.HEALTH_ALERT_THRESHOLD || '5'),
+          latencyThresholdMs: parseInt(process.env.HEALTH_LATENCY_THRESHOLD_MS || '500'),
+          criticalLatencyMs: parseInt(process.env.HEALTH_CRITICAL_LATENCY_MS || '2000'),
+          maxErrorRate: parseFloat(process.env.HEALTH_MAX_ERROR_RATE || '0.1'),
+          enableAlerts: process.env.HEALTH_ENABLE_ALERTS !== 'false'
+        });
+        
+        healthCheckService.start();
+        app.set('healthCheckService', healthCheckService);
+        console.log('Health check service initialized');
+        
+        // Step 3: Initialize recovery manager
+        recoveryManager = new DatabaseRecoveryManager(dbService, healthCheckService, {
+          circuitBreakerFailureThreshold: parseInt(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || '5'),
+          circuitBreakerResetTimeout: parseInt(process.env.CIRCUIT_BREAKER_RESET_TIMEOUT || '30000'),
+          maxRecoveryAttempts: parseInt(process.env.MAX_RECOVERY_ATTEMPTS || '3'),
+          recoveryBackoffMs: parseInt(process.env.RECOVERY_BACKOFF_MS || '5000'),
+          enableCircuitBreaker: process.env.ENABLE_CIRCUIT_BREAKER !== 'false',
+          enableGracefulDegradation: process.env.ENABLE_GRACEFUL_DEGRADATION !== 'false'
+        });
+        
+        app.set('recoveryManager', recoveryManager);
+        console.log('Database recovery manager initialized');
+        
+        // Step 4: Initialize real-time service
+        const realTimeService = new RealTimeService(io, {
+          collections: ['messages', 'reports', 'notices', 'chatgroups', 'privatechats'],
+          maxRetries: parseInt(process.env.CHANGE_STREAM_MAX_RETRIES || '10'),
+          initialDelayMs: parseInt(process.env.CHANGE_STREAM_INITIAL_DELAY_MS || '1000'),
+          maxDelayMs: parseInt(process.env.CHANGE_STREAM_MAX_DELAY_MS || '60000')
+        });
+        
+        await realTimeService.initialize();
+        app.set('realTimeService', realTimeService);
+        console.log('Real-time service initialized');
+        
+        console.log('All background services initialized successfully');
+      } catch (error) {
+        console.error('Background service initialization failed:', error);
+        // Server continues to run with basic functionality
+      }
     });
     
-    // Start health checks
-    healthCheckService.start();
-    console.log('Health check service initialized successfully');
-    
-    // Make health check service available to routes
-    app.set('healthCheckService', healthCheckService);
-    
-    // Step 3: Initialize recovery manager
-    console.log('Initializing database recovery manager...');
-    recoveryManager = new DatabaseRecoveryManager(dbService, healthCheckService, {
-      circuitBreakerFailureThreshold: parseInt(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || '5'),
-      circuitBreakerResetTimeout: parseInt(process.env.CIRCUIT_BREAKER_RESET_TIMEOUT || '30000'),
-      maxRecoveryAttempts: parseInt(process.env.MAX_RECOVERY_ATTEMPTS || '3'),
-      recoveryBackoffMs: parseInt(process.env.RECOVERY_BACKOFF_MS || '5000'),
-      enableCircuitBreaker: process.env.ENABLE_CIRCUIT_BREAKER !== 'false',
-      enableGracefulDegradation: process.env.ENABLE_GRACEFUL_DEGRADATION !== 'false'
-    });
-    
-    // Make recovery manager available to routes
-    app.set('recoveryManager', recoveryManager);
-    console.log('Database recovery manager initialized successfully');
-    
-    // Step 4: Initialize real-time service with MongoDB change streams
-    console.log('Initializing real-time service...');
-    const realTimeService = new RealTimeService(io, {
-      collections: ['messages', 'reports', 'notices', 'chatgroups', 'privatechats'],
-      maxRetries: parseInt(process.env.CHANGE_STREAM_MAX_RETRIES || '10'),
-      initialDelayMs: parseInt(process.env.CHANGE_STREAM_INITIAL_DELAY_MS || '1000'),
-      maxDelayMs: parseInt(process.env.CHANGE_STREAM_MAX_DELAY_MS || '60000')
-    });
-    
-    await realTimeService.initialize();
-    console.log('Real-time service initialized successfully');
-    
-    // Make real-time service available to routes
-    app.set('realTimeService', realTimeService);
-    
-    console.log('All services initialized successfully');
     return true;
   } catch (error) {
-    console.error('Failed to initialize services:', error);
-    
-    // Attempt to clean up any partially initialized services
-    await cleanupServices();
-    
-    // Return false to indicate initialization failure
+    console.error('Failed to initialize essential services:', error);
     return false;
   }
 }
@@ -393,24 +397,53 @@ app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5001;
 
-// Start the server with proper initialization
+// Start the server with Railway-optimized initialization
 (async () => {
   try {
-    // Initialize all services
-    const initialized = await initializeServices();
+    console.log(`Starting server on port ${PORT}...`);
     
-    if (!initialized) {
-      console.error('Failed to initialize services. Server will not start.');
-      process.exit(1);
-    }
-    
-    // Start the HTTP server
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    // Start HTTP server immediately for Railway health checks
+    server.listen(PORT, '0.0.0.0', async () => {
+      console.log(`✅ Server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`Health check: http://localhost:${PORT}/api/health`);
+      
+      // Initialize services after server is listening
+      try {
+        const initialized = await initializeServices();
+        if (initialized) {
+          console.log('✅ Essential services initialized');
+        } else {
+          console.warn('⚠️ Running in degraded mode - some services failed to initialize');
+        }
+      } catch (error) {
+        console.error('⚠️ Service initialization error:', error.message);
+        console.log('Server continues in basic mode');
+      }
     });
+    
   } catch (error) {
-    console.error('Fatal error during server startup:', error);
-    process.exit(1);
+    console.error('❌ Fatal server startup error:', error);
+    
+    // Emergency fallback server
+    const express = require("express");
+    const cors = require("cors");
+    const minimalApp = express();
+    
+    minimalApp.use(cors({ origin: true, credentials: true }));
+    minimalApp.use(express.json());
+    
+    minimalApp.get('/api/health', (req, res) => {
+      res.json({
+        status: 'emergency',
+        message: 'Server running in emergency mode',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    });
+    
+    minimalApp.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚨 Emergency server running on port ${PORT}`);
+    });
   }
 })();

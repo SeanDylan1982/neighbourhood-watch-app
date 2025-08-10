@@ -8,7 +8,6 @@
 
 - [x] 2. Fix client-side API configuration
 
-
   - Update the getApiUrl() function in client/src/config/api.js to provide proper fallback
   - Ensure consistent API URL resolution across different environments
   - Improve logging for debugging API configuration issues

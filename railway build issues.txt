@@ -1,0 +1,95 @@
+railway build issues:
+
+npm warn deprecated @babel/plugin-proposal-private-property-in-object@7.21.11: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-property-in-object instead.
+
+npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+
+npm warn deprecated @mui/base@5.0.0-dev.20240529-082515-213b5e33ab: This package has been replaced by @base-ui-components/react
+
+
+added 1564 packages, and audited 1565 packages in 20s
+
+
+289 packages are looking for funding
+  run `npm fund` for details
+
+
+24 vulnerabilities (3 low, 6 moderate, 13 high, 2 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+
+[stage-0  8/10] RUN --mount=type=cache,id=s/31c3a05a-6a66-4781-81a3-8ff82f5b18fa-node_modules/cache,target=/app/node_modules/.cache npm run install-all  ✔ 30 sec
+
+[stage-0  9/10] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+
+[stage-0  9/10] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile  ✔ 642 ms
+
+[stage-0 10/10] COPY . /app
+
+[stage-0 10/10] COPY . /app  ✔ 223 ms
+
+exporting to docker image format
+
+exporting to image
+
+importing to docker
+
+[auth] sharing credentials for production-us-east4-eqdc4a.railway-registry.com
+
+[auth] sharing credentials for production-us-east4-eqdc4a.railway-registry.com  ✔ 0 ms
+
+importing to docker  ✔ 34 sec
+
+=== Successfully Built! ===
+
+Run:
+
+docker run -it production-us-east4-eqdc4a.railway-registry.com/31c3a05a-6a66-4781-81a3-8ff82f5b18fa:8411fd8f-de5e-4c6a-b441-eae0442cf106
+
+Build time: 115.12 seconds
+
+ 
+
+====================
+
+Starting Healthcheck
+
+====================
+
+
+Path: /api/health
+
+Retry window: 50m0s
+
+ 
+
+Attempt #1 failed with service unavailable. Continuing to retry for 49m49s
+
+Attempt #2 failed with service unavailable. Continuing to retry for 49m48s
+
+Attempt #3 failed with service unavailable. Continuing to retry for 49m46s
+
+Attempt #4 failed with service unavailable. Continuing to retry for 49m42s
+
+Attempt #5 failed with service unavailable. Continuing to retry for 49m34s
+
+Attempt #6 failed with service unavailable. Continuing to retry for 49m17s
+
+Attempt #7 failed with service unavailable. Continuing to retry for 48m47s
+
+Attempt #8 failed with service unavailable. Continuing to retry for 48m17s
+
+Attempt #9 failed with service unavailable. Continuing to retry for 47m47s
+
+Attempt #10 failed with service unavailable. Continuing to retry for 47m16s
+
+Attempt #11 failed with service unavailable. Continuing to retry for 46m46s
