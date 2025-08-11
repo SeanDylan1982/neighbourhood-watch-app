@@ -1,4 +1,4 @@
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react";
 import icons from "../../components/Common/Icons";
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -51,7 +51,7 @@ const Dashboard = () => {
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      console.log('=== FETCHING DASHBOARD DATA ===');
+      console.log("=== FETCHING DASHBOARD DATA ===");
       clearError();
 
       // Add cache-busting parameter to ensure fresh data
@@ -116,9 +116,9 @@ const Dashboard = () => {
         reportsData = Array.isArray(reportsResult) ? reportsResult : [];
       }
 
-      console.log('Dashboard stats data:', statsData);
-      console.log('Neighbours count:', statsData.neighbours);
-      
+      console.log("Dashboard stats data:", statsData);
+      console.log("Neighbours count:", statsData.neighbours);
+
       setStats(statsData);
       setRecentNotices(Array.isArray(noticesData) ? noticesData : []);
       setRecentReports(Array.isArray(reportsData) ? reportsData : []);
@@ -219,7 +219,14 @@ const Dashboard = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Box>
           <Typography variant="h4" gutterBottom>
             Welcome back, {user?.firstName}!

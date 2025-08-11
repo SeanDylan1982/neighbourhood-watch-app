@@ -1,4 +1,4 @@
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react";
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
