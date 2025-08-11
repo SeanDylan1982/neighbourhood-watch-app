@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 /**
  * Custom hook for consistent data fetching with loading states and error handling
@@ -39,7 +40,7 @@ const useDataFetching = (options = {}) => {
         }
 
         // Ensure we use the correct base URL for API calls
-        const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+        const baseURL = API_BASE_URL;
         const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
 
         const defaultOptions = {

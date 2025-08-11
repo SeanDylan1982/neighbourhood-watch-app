@@ -1,5 +1,6 @@
 import icons from '../../components/Common/Icons'
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_BASE_URL } from '../../config/api';
 
 import LoadingState from '../../components/Common/LoadingState';
 import useDataFetching from '../../hooks/useDataFetching';
@@ -210,7 +211,7 @@ const Settings = () => {
 
     try {
       setSaving(true);
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/settings/password`, {
         method: 'PUT',
         headers: {
@@ -253,7 +254,7 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     try {
       setSaving(true);
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/settings/account`, {
         method: 'DELETE',
         headers: {

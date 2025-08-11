@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import { Outlet, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -25,7 +26,7 @@ const Layout = () => {
       try {
         if (user) {
           // Use the same base URL pattern as other components
-          const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+          const baseURL = API_BASE_URL;
           const response = await fetch(`${baseURL}/api/settings/interface`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`,

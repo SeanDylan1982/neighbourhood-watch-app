@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import useErrorHandler from './useErrorHandler';
 import useOfflineDetection from './useOfflineDetection';
+import { API_BASE_URL } from '../config/api';
 
 const useApi = () => {
   const [loading, setLoading] = useState(false);
@@ -10,7 +11,7 @@ const useApi = () => {
 
   const makeRequest = useCallback(async (url, options = {}) => {
     // Ensure we use the correct base URL for API calls
-    const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+    const baseURL = API_BASE_URL;
     const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
 
     // Check if offline
@@ -106,7 +107,7 @@ const useApi = () => {
   }, [handleError, clearError, isOnline]);
 
   const makeRequestWithRetry = useCallback(async (url, options = {}, maxRetries = 3) => {
-    const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+    const baseURL = API_BASE_URL;
     const fullUrl = url.startsWith('http') ? url : `${baseURL}${url}`;
     return retryWithErrorHandling(
       () => makeRequest(url, options),

@@ -20,6 +20,7 @@ import icons from "../Common/Icons";
 import { useAuth } from "../../contexts/AuthContext";
 import Logo from "../Common/Logo/Logo";
 import { BRAND } from "../../constants/branding";
+import { API_BASE_URL } from '../../config/api';
 
 const drawerWidthExpanded = 230;
 const drawerWidthCollapsed = 70;
@@ -67,8 +68,7 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   useEffect(() => {
     const saveSidebarPreference = async () => {
       try {
-        const baseURL =
-          process.env.REACT_APP_API_URL || "http://localhost:5001";
+        const baseURL = API_BASE_URL;
         const response = await fetch(`${baseURL}/api/settings/interface`, {
           method: "PUT",
           headers: {

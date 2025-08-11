@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 const useOfflineDetection = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -71,7 +72,7 @@ const useOfflineDetection = () => {
       if (navigator.onLine && !isOnline) {
         try {
           // Try to fetch a small resource to verify actual connectivity
-          const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+          const baseURL = API_BASE_URL;
           const response = await fetch(`${baseURL}/api/health`, {
             method: 'HEAD',
             cache: 'no-cache',

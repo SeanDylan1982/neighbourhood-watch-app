@@ -14,6 +14,7 @@ import {
   Pending as PendingIcon,
   People as PeopleIcon
 } from '@mui/icons-material';
+import { API_BASE_URL } from '../../config/api';
 
 const FriendRequestButton = ({ 
   userId, 
@@ -57,7 +58,7 @@ const FriendRequestButton = ({
   const sendFriendRequest = async () => {
     setLoading(true);
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/friends/request`, {
         method: 'POST',
         headers: {

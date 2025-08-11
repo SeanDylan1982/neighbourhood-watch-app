@@ -1,6 +1,7 @@
 /**
  * Utility functions for handling image URLs
  */
+import { API_BASE_URL } from '../config/api';
 
 /**
  * Get the full URL for an image
@@ -16,7 +17,7 @@ export const getFullImageUrl = (imageUrl) => {
   }
   
   // If it's a relative URL, prepend the API base URL
-  const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+  const baseURL = API_BASE_URL;
   
   // Ensure the URL starts with /
   const normalizedUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;

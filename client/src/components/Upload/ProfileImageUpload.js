@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { getFullImageUrl, getUserInitials } from '../../utils/imageUtils';
+import { API_BASE_URL } from '../../config/api';
 
 const ProfileImageUpload = ({ 
   currentImageUrl, 
@@ -66,7 +67,7 @@ const ProfileImageUpload = ({
       const formData = new FormData();
       formData.append('profileImage', selectedFile);
 
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const uploadUrl = `${baseURL}/api/upload/profile-image`;
       const token = localStorage.getItem('token');
       
@@ -126,7 +127,7 @@ const ProfileImageUpload = ({
       // Extract file path from URL
       const filePath = currentImageUrl.replace('/uploads/', '');
       
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/upload/file/${filePath}`, {
         method: 'DELETE',
         headers: {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../../../config/api';
 import { IconButton, Tooltip, CircularProgress } from '@mui/material';
 import FluentIcon from '../Icons/FluentIcon';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -39,7 +40,7 @@ const PinAction = ({
     setLoading(true);
     
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const endpoint = isPinned 
         ? `${baseURL}/api/${contentType}s/${contentId}/unpin`
         : `${baseURL}/api/${contentType}s/${contentId}/pin`;

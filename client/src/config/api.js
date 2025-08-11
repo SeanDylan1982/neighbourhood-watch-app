@@ -1,6 +1,6 @@
 // API Configuration - COMPLETELY REWRITTEN TO ELIMINATE OLD URLs
 const RAILWAY_API_URL = "https://neighbourwatch-development.up.railway.app";
-const LOCAL_API_URL = "http://localhost:5001";
+const LOCAL_API_URL = "https://neighbourwatch-development.up.railway.app";
 
 const getApiUrl = () => {
   // FORCE the correct Railway URL - no concatenation, no fallbacks, no old URLs

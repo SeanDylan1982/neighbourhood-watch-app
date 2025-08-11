@@ -1,5 +1,6 @@
 import icons from '../../components/Common/Icons'
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from '../../config/api';
 import { ImageUpload, MediaPreview } from '../../components/Upload';
 import { ImageThumbnailGrid } from '../../components/Common/ImageThumbnail';
 import ReportsWelcomeMessage from '../../components/Welcome/ReportsWelcomeMessage';
@@ -214,7 +215,7 @@ const Reports = () => {
         formData.append('media', file);
       });
 
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/reports`, {
         method: 'POST',
         headers: {
@@ -337,7 +338,7 @@ const Reports = () => {
     }
 
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/moderation/report`, {
         method: 'POST',
         headers: {

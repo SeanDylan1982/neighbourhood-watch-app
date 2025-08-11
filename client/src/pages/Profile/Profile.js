@@ -34,6 +34,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { ProfileImageUpload } from '../../components/Upload';
 import { getFullImageUrl } from '../../utils/imageUtils';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
@@ -68,7 +69,7 @@ const Profile = () => {
       // Fetch user statistics
       const fetchStats = async () => {
         try {
-          const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+          const baseURL = API_BASE_URL;
           const response = await axios.get(`${baseURL}/api/statistics/profile`);
           setStats(response.data);
         } catch (error) {
@@ -87,7 +88,7 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await axios.put(`${baseURL}/api/users/profile`, profileData, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

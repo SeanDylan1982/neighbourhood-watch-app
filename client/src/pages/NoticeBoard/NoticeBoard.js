@@ -12,6 +12,7 @@ import ViewToggle from '../../components/Common/ViewToggle/ViewToggle';
 import useViewPreference from '../../hooks/useViewPreference';
 import PinIcon from '../../components/Common/PinIcon';
 import PinAction from '../../components/Common/PinAction';
+import { API_BASE_URL } from '../../config/api';
 import {
   Box,
   Typography,
@@ -123,7 +124,7 @@ const NoticeBoard = () => {
 
   const fetchNotices = useCallback(async () => {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -185,7 +186,7 @@ const NoticeBoard = () => {
 
   const fetchSingleNotice = useCallback(async (id) => {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${baseURL}/api/notices/${id}`, {
@@ -327,7 +328,7 @@ const NoticeBoard = () => {
         formData.append('media', file);
       });
 
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/notices`, {
         method: 'POST',
         headers: {
@@ -423,7 +424,7 @@ const NoticeBoard = () => {
     }
 
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/moderation/report`, {
         method: 'POST',
         headers: {

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './LegalDocumentViewer.css';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+import { API_BASE_URL } from '../../config/api';
 
 /**
  * LegalDocumentViewer Component

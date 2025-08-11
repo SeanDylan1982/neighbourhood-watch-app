@@ -1,5 +1,6 @@
 import icons from '../Common/Icons'
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import {
   Box,
   Typography,
@@ -39,7 +40,7 @@ const FriendRequests = ({ onRequestUpdate }) => {
 
   const fetchRequests = async () => {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const [receivedRes, sentRes] = await Promise.all([
         fetch(`${baseURL}/api/friends/requests?type=received`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }

@@ -1,5 +1,6 @@
 import icons from '../Common/Icons'
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config/api';
 import {
   Box,
   List,
@@ -42,7 +43,7 @@ const FriendsList = ({ onStartChat }) => {
 
   const fetchFriends = async () => {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/friends`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

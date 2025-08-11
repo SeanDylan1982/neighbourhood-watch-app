@@ -1,4 +1,5 @@
 import serviceWorkerManager from './ServiceWorkerManager.js';
+import { API_BASE_URL } from '../config/api';
 
 class PushNotificationService {
   constructor() {
@@ -107,7 +108,7 @@ class PushNotificationService {
 
   async sendSubscriptionToServer(subscription) {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/notifications/push/subscribe`, {
         method: 'POST',
         headers: {
@@ -130,7 +131,7 @@ class PushNotificationService {
 
   async removeSubscriptionFromServer(subscription) {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/notifications/push/unsubscribe`, {
         method: 'POST',
         headers: {
@@ -277,7 +278,7 @@ class PushNotificationService {
 
   async sendHuaweiTokenToServer(token) {
     try {
-      const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const baseURL = API_BASE_URL;
       const response = await fetch(`${baseURL}/api/notifications/push/huawei-subscribe`, {
         method: 'POST',
         headers: {
