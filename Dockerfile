@@ -1,42 +1,38 @@
-# Use Node.js 18 LTS
-FROM node:18-alpine
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Set working directory
+# ===== Backend =====
+FROM node:18 AS server-build
 WORKDIR /app
 
-# Copy package files and install root dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy and install server dependencies
+# Install server deps
 COPY server/package*.json ./server/
 RUN cd server && npm install
 
-# Copy and install client dependencies
+# Copy server code
+COPY server ./server
+
+# ===== Frontend =====
+FROM node:18 AS client-build
+WORKDIR /app
+
+# Install client deps
 COPY client/package*.json ./client/
 RUN cd client && npm install
 
-# Copy source code
-COPY . .
+# Copy client code
+COPY client ./client
 
 # Build client
 RUN cd client && npm run build
 
-# Copy built client to server public directory
-RUN mkdir -p server/public && cp -r client/build/* server/public/
+# ===== Final =====
+FROM node:18 AS final
+WORKDIR /app
 
-# Set working directory to server
+# Copy server from build stage
+COPY --from=server-build /app/server ./server
+
+# Copy built client into server's public dir
+COPY --from=client-build /app/client/build ./server/public
+
 WORKDIR /app/server
 
-# Expose Railway's dynamic port
-EXPOSE $PORT
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-5001}/api/health || exit 1
-
-# Start server using railway-start.js
-CMD ["node", "railway-start.js"]
+CMD ["npm", "start"]
