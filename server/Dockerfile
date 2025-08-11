@@ -19,11 +19,9 @@ FROM node:18
 WORKDIR /app
 
 # Copy and install server dependencies
-COPY server/package*.json ./
-RUN npm install
-
-# Copy server source
-COPY server ./
+# Server deps
+COPY server/package*.json ./server/
+RUN cd server && npm install
 
 # Copy built client into server's public folder
 COPY --from=client-build /app/client/build ./public
