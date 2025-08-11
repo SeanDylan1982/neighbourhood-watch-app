@@ -39,7 +39,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "set DISABLE_ESLINT_PLUGIN=true && react-scripts build && npm run validate-assets",
+    "build": "set CI=false && set DISABLE_ESLINT_PLUGIN=true && react-scripts build && npm run validate-assets",
     "build:prod": "set CI=false && set DISABLE_ESLINT_PLUGIN=true && react-scripts build && npm run validate-assets && npm run copy-assets",
     "validate-assets": "node scripts/validate-assets.js",
     "copy-assets": "node scripts/copy-assets.js",
