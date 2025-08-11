@@ -39,8 +39,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "set CI=false && set DISABLE_ESLINT_PLUGIN=true && react-scripts build && npm run validate-assets",
-    "build:prod": "set CI=false && set DISABLE_ESLINT_PLUGIN=true && react-scripts build && npm run validate-assets && npm run copy-assets",
+    "build": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run validate-assets",
+    "build:prod": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run validate-assets && npm run copy-assets",
     "validate-assets": "node scripts/validate-assets.js",
     "copy-assets": "node scripts/copy-assets.js",
     "test": "react-scripts test",
@@ -65,6 +65,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^10.0.0",
     "eslint": "^8.57.1",
     "eslint-config-react-app": "^7.0.1",
     "jest-axe": "^10.0.0"

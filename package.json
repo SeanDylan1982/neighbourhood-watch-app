@@ -5,7 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "start": "cd server && node railway-start.js",
-    "build": "cd client && npm i && set CI=false && npm run build",
+    "build": "cd client && npm i && npm run build",
     "build:prod": "cd client && npm run build:prod && npm run validate-assets && npm run copy-assets",
     "validate-assets": "node scripts/validate-assets.js",
     "copy-assets": "node scripts/copy-assets.js",
