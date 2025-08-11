@@ -1,0 +1,35 @@
+{
+  "name": "neighbourhood-watch-app",
+  "version": "1.0.0",
+  "description": "Neighbourhood Watch Application - Full Stack",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && PORT=5004 npm start",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
+    "server:dev": "cd server && npm run dev",
+    "build": "cd client && npm run build",
+    "test": "concurrently \"cd server && npm test\" \"cd client && npm test\"",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "railway:test": "node test-minimal-server.js",
+    "railway:deploy-test": "node test-railway-deployment.js",
+    "railway:debug": "cd server && node railway-ultra-minimal.js",
+    "railway:start": "cd server && node railway-ultra-minimal.js",
+    "railway:ultra-test": "node test-ultra-minimal.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "neighbourhood-watch",
+    "community",
+    "safety",
+    "chat",
+    "react",
+    "node",
+    "express",
+    "mongodb"
+  ],
+  "author": "Neighbourhood Watch Team",
+  "license": "MIT"
+}

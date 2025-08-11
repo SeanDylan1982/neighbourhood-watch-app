@@ -14,6 +14,7 @@ The Railway deployment was failing during the healthcheck phase because:
 ### 1. Ultra-Minimal Railway Startup Script
 
 Created `server/railway-minimal.js` with only the absolute essentials:
+
 - Basic Express server
 - Simple CORS headers
 - Health check endpoint at `/api/health`
@@ -32,7 +33,7 @@ app.get("/api/health", (req, res) => {
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || "development",
     port: PORT,
-    railway: true
+    railway: true,
   });
 });
 ```
@@ -40,6 +41,7 @@ app.get("/api/health", (req, res) => {
 ### 3. Configuration Updates
 
 **railway.json**:
+
 ```json
 {
   "deploy": {
@@ -54,11 +56,13 @@ app.get("/api/health", (req, res) => {
 ```
 
 **Dockerfile**:
+
 ```dockerfile
 CMD ["node", "railway-minimal.js"]
 ```
 
 **package.json**:
+
 ```json
 {
   "scripts": {
@@ -70,6 +74,7 @@ CMD ["node", "railway-minimal.js"]
 ### 4. Environment Variables Fixed
 
 Fixed all `.env` files to use proper PORT configuration:
+
 ```env
 PORT=5001
 NODE_ENV=production
@@ -78,6 +83,7 @@ NODE_ENV=production
 ### 5. Health Check Endpoints
 
 The minimal server provides multiple health check paths:
+
 - `/api/health` - Primary health check
 - `/health` - Redirects to `/api/health`
 - `/healthz` - Redirects to `/api/health`
@@ -86,6 +92,7 @@ The minimal server provides multiple health check paths:
 ### 6. Testing
 
 Created comprehensive test scripts:
+
 - `test-minimal-server.js` - Tests the minimal server locally
 - `test-railway-deployment.js` - Tests the deployed Railway endpoint
 
@@ -107,9 +114,10 @@ Created comprehensive test scripts:
 ## Testing Results
 
 Local testing shows:
+
 ```
 ✅ Health Check: Status 200
-✅ Root Endpoint: Status 200  
+✅ Root Endpoint: Status 200
 ✅ Health Redirect: Status 302
 ✅ Healthz Redirect: Status 302
 ```
@@ -124,17 +132,20 @@ Local testing shows:
 ## Files Modified
 
 ### Core Files
+
 - `server/railway-minimal.js` - NEW: Ultra-minimal Railway server
 - `railway.json` - Updated start command
 - `Dockerfile` - Updated CMD directive
 - `server/package.json` - Updated start script
 
 ### Environment Files
+
 - `server/.env` - Fixed PORT configuration
-- `server/.env.production` - Fixed PORT configuration  
+- `server/.env.production` - Fixed PORT configuration
 - `server/.env.local` - Fixed PORT configuration
 
 ### Test Files
+
 - `test-minimal-server.js` - NEW: Local testing script
 - `test-railway-deployment.js` - Railway endpoint testing
 
@@ -144,6 +155,7 @@ Once deployed, the health check will be available at:
 `https://neighbourwatch-development.up.railway.app/api/health`
 
 Expected response:
+
 ```json
 {
   "status": "ok",
