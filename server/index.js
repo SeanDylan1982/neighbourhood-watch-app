@@ -43,6 +43,8 @@ const {
   databaseErrorHandler,
   notFoundHandler 
 } = require("./middleware/errorHandling");
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Initialize services
 let dbConnection = null;
@@ -278,7 +280,65 @@ app.use((req, res, next) => {
   }
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.options("*", cors());
+app.use(express.json());
+
+// Serve React build in production
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.use(express.static(path.join(__dirname, 'public')));
+app.use("/api/auth", authRoutes);
+app.use("/api/users", authenticateToken, requireActiveUser, userRoutes);
+app.use("/api/neighbourhoods", authenticateToken, requireActiveUser, neighbourhoodRoutes);
+app.use("/api/chat", authenticateToken, requireActiveUser, chatRoutes);
+app.use("/api/notices", authenticateToken, requireActiveUser, noticeRoutes);
+app.use("/api/reports", authenticateToken, requireActiveUser, reportRoutes);
+app.use("/api/statistics", authenticateToken, requireActiveUser, statisticsRoutes);
+app.use("/api/upload", authenticateToken, requireActiveUser, uploadRoutes); // adminLimiter disabled for development
+app.use("/api/friends", authenticateToken, requireActiveUser, friendRoutes);
+app.use("/api/private-chat", authenticateToken, requireActiveUser, privateChatRoutes);
+app.use("/api/settings", authenticateToken, requireActiveUser, settingsRoutes);
+app.use("/api/search", authenticateToken, requireActiveUser, searchRoutes);
+app.use("/api/notifications", authenticateToken, requireActiveUser, notificationRoutes);
+app.use("/api/terms", termsRoutes);
+app.use("/api/legal", legalRoutes);
+app.use("/api/admin", adminRoutes); // adminLimiter disabled for development
+app.use("/api/moderation", moderationRoutes);
+app.use("/api/health", healthRoutes);
+app.use("/api/database-metrics", databaseMetricsRoutes);
+app.use("/api/rate-limit", rateLimitStatusRoutes);
+app.use("/api/health/change-streams", authenticateToken, (req, res) => {
+  const realTimeService = req.app.get('realTimeService');
+
+  if (!realTimeService) {
+    return res.status(503).json({
+      status: 'unavailable',
+      message: 'Real-time service not initialized'
+    });
+  }
+
+  const status = realTimeService.getStatus();
+  res.json({
+    status: 'available',
+    initialized: status.initialized,
+    activeStreams: status.changeStreams.activeStreams,
+    collections: status.changeStreams.collections
+  });
+});
+app.use(notFoundHandler);
+
+// Error handling
+app.use(validationErrorHandler);
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 /**
  * Initialize essential services quickly for Railway startup
