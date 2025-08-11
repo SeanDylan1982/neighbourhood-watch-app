@@ -35,4 +35,4 @@ COPY --from=client-build /app/client/build ./server/public
 
 WORKDIR /app/server
 
-CMD ["node", "railway-ultra-minimal.js"]
+CMD ["node", "index.js"]
