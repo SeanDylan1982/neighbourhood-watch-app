@@ -3,7 +3,7 @@ const getApiUrl = () => {
   // Production: Force Railway URL
   if (process.env.NODE_ENV === "production") {
     console.log("🚀 Production mode: Using Railway backend URL");
-    return "https://neighbourwatch-development.up.railway.app/";
+    return "https://neighbourwatch-development.up.railway.app";
   }
   
   // Development: Check environment variable first, then fallback
