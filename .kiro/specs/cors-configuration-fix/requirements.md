@@ -12,7 +12,7 @@ This feature addresses the CORS (Cross-Origin Resource Sharing) configuration is
 
 #### Acceptance Criteria
 
-1. WHEN the server starts THEN the CORS configuration SHALL include the Railway production URL `https://web-production-d1da2.up.railway.app` in the allowed origins
+1. WHEN the server starts THEN the CORS configuration SHALL include the Railway production URL `https://neighbourwatch-development.up.railway.app/` in the allowed origins
 2. WHEN a request is made from the frontend to the Railway backend THEN the server SHALL respond with appropriate CORS headers
 3. WHEN the CORS origins are configured THEN they SHALL include both development and production URLs
 

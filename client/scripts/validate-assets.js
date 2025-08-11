@@ -51,16 +51,18 @@ class AssetValidator {
     // Check if sounds directory exists
     const soundsDir = path.join(this.publicDir, 'sounds');
     if (!fs.existsSync(soundsDir)) {
-      this.errors.push('Sounds directory not found at public/sounds');
+      this.warnings.push('Sounds directory not found at public/sounds - AudioManager will use synthetic fallback sounds');
       return;
     }
+
+    let audioFilesFound = 0;
 
     // Validate each required audio file
     REQUIRED_AUDIO_FILES.forEach(audioFile => {
       const filePath = path.join(this.publicDir, audioFile);
       
       if (!fs.existsSync(filePath)) {
-        this.warnings.push(`Audio file missing: ${audioFile}`);
+        this.log(`Audio file missing: ${audioFile} - will use fallback`, 'warning');
         return;
       }
 
@@ -78,9 +80,10 @@ class AssetValidator {
           this.warnings.push(`Unsupported audio format: ${audioFile} (${ext})`);
         }
 
+        audioFilesFound++;
         this.log(`✅ Audio file validated: ${audioFile}`);
       } catch (error) {
-        this.errors.push(`Error reading audio file ${audioFile}: ${error.message}`);
+        this.warnings.push(`Error reading audio file ${audioFile}: ${error.message}`);
       }
     });
 
@@ -93,12 +96,19 @@ class AssetValidator {
           const stats = fs.statSync(filePath);
           
           if (stats.size === 0) {
-            this.errors.push(`Empty audio file detected: sounds/${file}`);
+            this.warnings.push(`Empty audio file detected: sounds/${file}`);
           }
         }
       });
     } catch (error) {
-      this.errors.push(`Error scanning sounds directory: ${error.message}`);
+      this.warnings.push(`Error scanning sounds directory: ${error.message}`);
+    }
+
+    // Provide helpful message about audio fallbacks
+    if (audioFilesFound === 0) {
+      this.log('ℹ️ No audio files found - AudioManager will generate synthetic notification sounds', 'info');
+    } else if (audioFilesFound < REQUIRED_AUDIO_FILES.length) {
+      this.log(`ℹ️ ${audioFilesFound}/${REQUIRED_AUDIO_FILES.length} audio files found - AudioManager will use fallbacks for missing sounds`, 'info');
     }
   }
 

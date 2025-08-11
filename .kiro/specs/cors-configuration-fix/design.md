@@ -24,7 +24,7 @@ The CORS fix involves two main components:
 
 **Location**: `server/index.js`
 
-**Current Issue**: The CORS origins array does not include the Railway production URL `https://web-production-d1da2.up.railway.app`
+**Current Issue**: The CORS origins array does not include the Railway production URL `https://neighbourwatch-development.up.railway.app/`
 
 **Solution Components**:
 - Update the `cors()` middleware configuration
@@ -64,7 +64,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL || "http://localhost:3000",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  "https://web-production-d1da2.up.railway.app", // Railway backend URL
+  "https://neighbourwatch-development.up.railway.app/", // Railway backend URL
   "https://neighbourhood-watch-app.vercel.app",
   "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
   /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/
@@ -78,7 +78,7 @@ const allowedOrigins = [
 const getApiUrl = () => {
   // Production: Force Railway URL
   if (process.env.NODE_ENV === "production") {
-    return "https://web-production-d1da2.up.railway.app";
+    return "https://neighbourwatch-development.up.railway.app/";
   }
   
   // Development: Check environment variable first, then fallback
@@ -166,7 +166,7 @@ const getApiUrl = () => {
      process.env.CLIENT_URL || "http://localhost:3000",
      "http://localhost:3000",
      "http://127.0.0.1:3000",
-     "https://web-production-d1da2.up.railway.app", // Add this line
+     "https://neighbourwatch-development.up.railway.app/", // Add this line
      "https://neighbourhood-watch-app.vercel.app",
      // ... existing origins
    ]
@@ -183,7 +183,7 @@ const getApiUrl = () => {
    ```javascript
    const getApiUrl = () => {
      if (process.env.NODE_ENV === "production") {
-       return "https://web-production-d1da2.up.railway.app";
+       return "https://neighbourwatch-development.up.railway.app/";
      }
      
      const envUrl = process.env.REACT_APP_API_URL;

@@ -26,7 +26,7 @@ ADMIN_RATE_LIMIT_MAX=1000
 Your Vercel frontend should have these environment variables:
 
 ```
-REACT_APP_API_URL=https://web-production-d1da2.up.railway.app
+REACT_APP_API_URL=https://neighbourwatch-development.up.railway.app/
 REACT_APP_NAME=neibrly
 REACT_APP_VERSION=1.0.0
 REACT_APP_ENABLE_ANALYTICS=false
@@ -72,5 +72,5 @@ REACT_APP_ENABLE_NOTIFICATIONS=true
 ## URLs After Deployment
 
 - **Frontend**: https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app
-- **Backend**: https://web-production-d1da2.up.railway.app
+- **Backend**: https://neighbourwatch-development.up.railway.app/
 - **GitHub**: https://github.com/SeanDylan1982/neighbourhood-watch-app
