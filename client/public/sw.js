@@ -1,7 +1,7 @@
 // Service Worker for Neibrly - Neighborhood Community App
-const CACHE_NAME = "neibrly-app-v2";
-const STATIC_CACHE = "neibrly-static-v2";
-const DYNAMIC_CACHE = "neibrly-dynamic-v2";
+const CACHE_NAME = "neibrly-app-v3";
+const STATIC_CACHE = "neibrly-static-v3";
+const DYNAMIC_CACHE = "neibrly-dynamic-v3";
 
 // Essential files to cache for offline functionality
 const STATIC_ASSETS = [
