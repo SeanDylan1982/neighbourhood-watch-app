@@ -110,13 +110,7 @@ app.use(
   })
 );
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true, // if you use cookies/auth headers
-  })
-);
+// CORS configuration removed - using the comprehensive one below
 
 // Security middleware
 app.use(helmet());
@@ -289,14 +283,24 @@ app.set("io", io);
 // Socket.io setup
 setupSocketHandlers(io);
 
-// CORS - Allow all origins for now to fix deployment issues
+// COMPREHENSIVE CORS CONFIGURATION - Allow Vercel frontend
 app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      // Allow all origins for now - we'll restrict this later
+      // Allow Vercel deployments
+      if (origin.includes('vercel.app') || origin.includes('neighbourhood-watch-app')) {
+        return callback(null, true);
+      }
+
+      // Allow localhost for development
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+
+      // Allow all origins for now to fix deployment issues
       return callback(null, true);
     },
     credentials: true,
@@ -306,6 +310,8 @@ app.use(
       "Authorization",
       "X-Requested-With",
       "Access-Control-Allow-Origin",
+      "Accept",
+      "Origin"
     ],
     exposedHeaders: [
       "Authorization",
@@ -314,32 +320,32 @@ app.use(
       "Access-Control-Allow-Origin",
     ],
     optionsSuccessStatus: 200,
+    preflightContinue: false
   })
 );
 
-// Additional CORS headers for preflight requests
+// Additional CORS headers for preflight requests - ENHANCED WITH DEBUGGING
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin) {
-    res.header("Access-Control-Allow-Origin", origin);
-  } else {
-    res.header("Access-Control-Allow-Origin", "*");
-  }
+  
+  // Debug logging
+  console.log(`🔧 CORS Request: ${req.method} ${req.url} from origin: ${origin}`);
+  
+  // Set CORS headers for all requests - ALWAYS ALLOW
+  res.header("Access-Control-Allow-Origin", origin || "*");
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With"
-  );
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  res.header("Access-Control-Max-Age", "86400"); // 24 hours
 
+  // Handle preflight requests
   if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
+    console.log(`🔧 CORS Preflight Response: 200 OK for ${origin} -> ${req.url}`);
+    res.status(200).end();
+    return;
   }
+  
+  next();
 });
 
 // __dirname is available in CommonJS
