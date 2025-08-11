@@ -58,7 +58,6 @@ const io = new Server(server, {
       process.env.CLIENT_URL || "http://localhost:3000",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://web-production-d1da2.up.railway.app",
         "https://neighbourhood-watch-app.vercel.app",
         "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
       // Allow any vercel.app subdomain for this project
@@ -83,7 +82,6 @@ app.use(
       const allowedOrigins = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://web-production-d1da2.up.railway.app",
         "https://neighbourhood-watch-app.vercel.app",
         "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app"
       ];
@@ -150,7 +148,6 @@ app.use(compression());
 // const allowedOrigins = [
 //   "http://localhost:3000",
 //   "http://127.0.0.1:3000",
-//   "https://web-production-d1da2.up.railway.app",
 //   "https://neighbourhood-watch-app.vercel.app",
 //   "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app" // or whatever port Vite runs on
 // ];
