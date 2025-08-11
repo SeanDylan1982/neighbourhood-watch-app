@@ -5,7 +5,13 @@ const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
-require("dotenv").config({ path: require('path').join(__dirname, '.env.local', '.env.development' || '.env.production') });
+require("dotenv").config({
+  path: require("path").join(
+    __dirname,
+    ".env.local",
+    ".env.development" || ".env.production"
+  ),
+});
 
 // Database connection
 const connectDB = require("./config/database");
@@ -42,9 +48,9 @@ const {
   timeoutHandler,
   databaseErrorHandler,
   validationErrorHandler,
-  notFoundHandler
+  notFoundHandler,
 } = require("./middleware/errorHandling");
-const path = require('path');
+const path = require("path");
 
 // Initialize services
 let dbConnection = null;
@@ -57,9 +63,11 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      process.env.CLIENT_URL || "https://neighbourhood-watch-app.vercel.app", "https://neighbourhood-watch-app.vercel.app/login", "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
+      process.env.CLIENT_URL || "https://neighbourhood-watch-app.vercel.app",
+      "https://neighbourhood-watch-app.vercel.app/login",
+      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
       // Allow any vercel.app subdomain for this project
-      "/^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/",
+      "/^https://neighbourhood-watch-app.*.vercel.app$/",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
@@ -83,10 +91,20 @@ app.use(
         "https://neighbourhood-watch-app.vercel.app",
       ];
       const origin = res.req.headers.origin;
-      if (allowedOrigins.includes(origin) || /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/.test(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/.test(origin)
+      ) {
         res.set("Access-Control-Allow-Origin", origin);
       }
-      res.set("Access-Control-Allow-Methods", "GET", "POST", "PUT", "DELETE", "OPTIONS");
+      res.set(
+        "Access-Control-Allow-Methods",
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS"
+      );
       res.set("Access-Control-Allow-Credentials", "true");
     },
   })
@@ -94,8 +112,7 @@ app.use(
 
 app.use(
   cors({
-    origin:
-      "*",
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // if you use cookies/auth headers
   })
@@ -140,8 +157,6 @@ app.use(compression());
 
 // app.use(limiter); // DISABLED
 
-
-
 // const allowedOrigins = [
 //   "http://localhost:3000",
 //   "http://127.0.0.1:3000",
@@ -176,17 +191,37 @@ app.use(databaseErrorHandler);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", authenticateToken, requireActiveUser, userRoutes);
-app.use("/api/neighbourhoods", authenticateToken, requireActiveUser, neighbourhoodRoutes);
+app.use(
+  "/api/neighbourhoods",
+  authenticateToken,
+  requireActiveUser,
+  neighbourhoodRoutes
+);
 app.use("/api/chat", authenticateToken, requireActiveUser, chatRoutes);
 app.use("/api/notices", authenticateToken, requireActiveUser, noticeRoutes);
 app.use("/api/reports", authenticateToken, requireActiveUser, reportRoutes);
-app.use("/api/statistics", authenticateToken, requireActiveUser, statisticsRoutes);
+app.use(
+  "/api/statistics",
+  authenticateToken,
+  requireActiveUser,
+  statisticsRoutes
+);
 app.use("/api/upload", authenticateToken, requireActiveUser, uploadRoutes);
 app.use("/api/friends", authenticateToken, requireActiveUser, friendRoutes);
-app.use("/api/private-chat", authenticateToken, requireActiveUser, privateChatRoutes);
+app.use(
+  "/api/private-chat",
+  authenticateToken,
+  requireActiveUser,
+  privateChatRoutes
+);
 app.use("/api/settings", authenticateToken, requireActiveUser, settingsRoutes);
 app.use("/api/search", authenticateToken, requireActiveUser, searchRoutes);
-app.use("/api/notifications", authenticateToken, requireActiveUser, notificationRoutes);
+app.use(
+  "/api/notifications",
+  authenticateToken,
+  requireActiveUser,
+  notificationRoutes
+);
 app.use("/api/terms", termsRoutes);
 app.use("/api/legal", legalRoutes);
 app.use("/api/legal", legalRoutes);
@@ -196,12 +231,12 @@ app.use("/api/moderation", moderationRoutes);
 // Simple health check for Railway (before full health routes)
 app.get("/api/health", (req, res) => {
   res.status(200).json({
-    status: 'ok',
+    status: "ok",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env.NODE_ENV || "development",
     port: process.env.PORT || 5001,
-    services: 'basic'
+    services: "basic",
   });
 });
 
@@ -216,26 +251,26 @@ app.use("/api/rate-limit", rateLimitStatusRoutes);
 
 // Change streams status endpoint
 app.get("/api/health/change-streams", authenticateToken, (req, res) => {
-  const realTimeService = req.app.get('realTimeService');
-  
+  const realTimeService = req.app.get("realTimeService");
+
   if (!realTimeService) {
-    return res.status(503).json({ 
-      status: 'unavailable',
-      message: 'Real-time service not initialized'
+    return res.status(503).json({
+      status: "unavailable",
+      message: "Real-time service not initialized",
     });
   }
-  
+
   const status = realTimeService.getStatus();
   res.json({
-    status: 'available',
+    status: "available",
     initialized: status.initialized,
     activeStreams: status.changeStreams.activeStreams,
-    collections: status.changeStreams.collections
+    collections: status.changeStreams.collections,
   });
 });
 
 // Make io instance available to routes
-app.set('io', io);
+app.set("io", io);
 
 // Socket.io setup
 setupSocketHandlers(io);
@@ -262,7 +297,7 @@ app.use(
       "Authorization",
       "Content-Type",
       "X-Requested-With",
-      "Access-Control-Allow-Origin"
+      "Access-Control-Allow-Origin",
     ],
     optionsSuccessStatus: 200,
   })
@@ -272,15 +307,21 @@ app.use(
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header("Access-Control-Allow-Origin", origin);
   } else {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header("Access-Control-Allow-Origin", "*");
   }
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  
-  if (req.method === 'OPTIONS') {
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With"
+  );
+
+  if (req.method === "OPTIONS") {
     res.sendStatus(200);
   } else {
     next();
@@ -296,77 +337,109 @@ app.use((req, res, next) => {
  * Non-essential services are initialized in the background
  */
 async function initializeServices() {
-  console.log('Starting fast server initialization...');
-  
+  console.log("Starting fast server initialization...");
+
   try {
     // Step 1: Connect to MongoDB with shorter timeout for Railway
-    console.log('Connecting to MongoDB...');
+    console.log("Connecting to MongoDB...");
     dbConnection = await Promise.race([
       connectDB(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('MongoDB connection timeout')), 15000)
-      )
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("MongoDB connection timeout")), 15000)
+      ),
     ]);
-    console.log('MongoDB connection established successfully');
-    
+    console.log("MongoDB connection established successfully");
+
     // Make database service available to routes
-    app.set('dbService', dbService);
-    
+    app.set("dbService", dbService);
+
     // Initialize other services in background after server starts
     setImmediate(async () => {
       try {
-        console.log('Initializing background services...');
-        
+        console.log("Initializing background services...");
+
         // Step 2: Initialize health check service
         healthCheckService = new HealthCheckService(dbService, {
-          checkIntervalMs: parseInt(process.env.HEALTH_CHECK_INTERVAL_MS || '30000'),
-          unhealthyThreshold: parseInt(process.env.HEALTH_UNHEALTHY_THRESHOLD || '3'),
-          alertThreshold: parseInt(process.env.HEALTH_ALERT_THRESHOLD || '5'),
-          latencyThresholdMs: parseInt(process.env.HEALTH_LATENCY_THRESHOLD_MS || '500'),
-          criticalLatencyMs: parseInt(process.env.HEALTH_CRITICAL_LATENCY_MS || '2000'),
-          maxErrorRate: parseFloat(process.env.HEALTH_MAX_ERROR_RATE || '0.1'),
-          enableAlerts: process.env.HEALTH_ENABLE_ALERTS !== 'false'
+          checkIntervalMs: parseInt(
+            process.env.HEALTH_CHECK_INTERVAL_MS || "30000"
+          ),
+          unhealthyThreshold: parseInt(
+            process.env.HEALTH_UNHEALTHY_THRESHOLD || "3"
+          ),
+          alertThreshold: parseInt(process.env.HEALTH_ALERT_THRESHOLD || "5"),
+          latencyThresholdMs: parseInt(
+            process.env.HEALTH_LATENCY_THRESHOLD_MS || "500"
+          ),
+          criticalLatencyMs: parseInt(
+            process.env.HEALTH_CRITICAL_LATENCY_MS || "2000"
+          ),
+          maxErrorRate: parseFloat(process.env.HEALTH_MAX_ERROR_RATE || "0.1"),
+          enableAlerts: process.env.HEALTH_ENABLE_ALERTS !== "false",
         });
-        
+
         healthCheckService.start();
-        app.set('healthCheckService', healthCheckService);
-        console.log('Health check service initialized');
-        
+        app.set("healthCheckService", healthCheckService);
+        console.log("Health check service initialized");
+
         // Step 3: Initialize recovery manager
-        recoveryManager = new DatabaseRecoveryManager(dbService, healthCheckService, {
-          circuitBreakerFailureThreshold: parseInt(process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || '5'),
-          circuitBreakerResetTimeout: parseInt(process.env.CIRCUIT_BREAKER_RESET_TIMEOUT || '30000'),
-          maxRecoveryAttempts: parseInt(process.env.MAX_RECOVERY_ATTEMPTS || '3'),
-          recoveryBackoffMs: parseInt(process.env.RECOVERY_BACKOFF_MS || '5000'),
-          enableCircuitBreaker: process.env.ENABLE_CIRCUIT_BREAKER !== 'false',
-          enableGracefulDegradation: process.env.ENABLE_GRACEFUL_DEGRADATION !== 'false'
-        });
-        
-        app.set('recoveryManager', recoveryManager);
-        console.log('Database recovery manager initialized');
-        
+        recoveryManager = new DatabaseRecoveryManager(
+          dbService,
+          healthCheckService,
+          {
+            circuitBreakerFailureThreshold: parseInt(
+              process.env.CIRCUIT_BREAKER_FAILURE_THRESHOLD || "5"
+            ),
+            circuitBreakerResetTimeout: parseInt(
+              process.env.CIRCUIT_BREAKER_RESET_TIMEOUT || "30000"
+            ),
+            maxRecoveryAttempts: parseInt(
+              process.env.MAX_RECOVERY_ATTEMPTS || "3"
+            ),
+            recoveryBackoffMs: parseInt(
+              process.env.RECOVERY_BACKOFF_MS || "5000"
+            ),
+            enableCircuitBreaker:
+              process.env.ENABLE_CIRCUIT_BREAKER !== "false",
+            enableGracefulDegradation:
+              process.env.ENABLE_GRACEFUL_DEGRADATION !== "false",
+          }
+        );
+
+        app.set("recoveryManager", recoveryManager);
+        console.log("Database recovery manager initialized");
+
         // Step 4: Initialize real-time service
         const realTimeService = new RealTimeService(io, {
-          collections: ['messages', 'reports', 'notices', 'chatgroups', 'privatechats'],
-          maxRetries: parseInt(process.env.CHANGE_STREAM_MAX_RETRIES || '10'),
-          initialDelayMs: parseInt(process.env.CHANGE_STREAM_INITIAL_DELAY_MS || '1000'),
-          maxDelayMs: parseInt(process.env.CHANGE_STREAM_MAX_DELAY_MS || '60000')
+          collections: [
+            "messages",
+            "reports",
+            "notices",
+            "chatgroups",
+            "privatechats",
+          ],
+          maxRetries: parseInt(process.env.CHANGE_STREAM_MAX_RETRIES || "10"),
+          initialDelayMs: parseInt(
+            process.env.CHANGE_STREAM_INITIAL_DELAY_MS || "1000"
+          ),
+          maxDelayMs: parseInt(
+            process.env.CHANGE_STREAM_MAX_DELAY_MS || "60000"
+          ),
         });
-        
+
         await realTimeService.initialize();
-        app.set('realTimeService', realTimeService);
-        console.log('Real-time service initialized');
-        
-        console.log('All background services initialized successfully');
+        app.set("realTimeService", realTimeService);
+        console.log("Real-time service initialized");
+
+        console.log("All background services initialized successfully");
       } catch (error) {
-        console.error('Background service initialization failed:', error);
+        console.error("Background service initialization failed:", error);
         // Server continues to run with basic functionality
       }
     });
-    
+
     return true;
   } catch (error) {
-    console.error('Failed to initialize essential services:', error);
+    console.error("Failed to initialize essential services:", error);
     return false;
   }
 }
@@ -375,36 +448,36 @@ async function initializeServices() {
  * Clean up services during shutdown or failed initialization
  */
 async function cleanupServices() {
-  console.log('Cleaning up services...');
-  
+  console.log("Cleaning up services...");
+
   // Clean up health check service
   if (healthCheckService) {
     try {
       healthCheckService.stop();
-      console.log('Health check service stopped');
+      console.log("Health check service stopped");
     } catch (error) {
-      console.error('Error stopping health check service:', error);
+      console.error("Error stopping health check service:", error);
     }
   }
-  
+
   // Clean up database connection
   if (dbService && dbService.isConnected) {
     try {
       await dbService.disconnect();
-      console.log('Database connection closed');
+      console.log("Database connection closed");
     } catch (error) {
-      console.error('Error closing database connection:', error);
+      console.error("Error closing database connection:", error);
     }
   }
-  
+
   // Clean up real-time service
-  const realTimeService = app.get('realTimeService');
+  const realTimeService = app.get("realTimeService");
   if (realTimeService) {
     try {
       await realTimeService.close();
-      console.log('Real-time service closed');
+      console.log("Real-time service closed");
     } catch (error) {
-      console.error('Error closing real-time service:', error);
+      console.error("Error closing real-time service:", error);
     }
   }
 }
@@ -413,27 +486,29 @@ async function cleanupServices() {
  * Handle graceful shutdown
  */
 const gracefulShutdown = async () => {
-  console.log('Shutting down gracefully...');
-  
+  console.log("Shutting down gracefully...");
+
   // Clean up all services
   await cleanupServices();
-  
+
   // Close server
   server.close(() => {
-    console.log('HTTP server closed');
+    console.log("HTTP server closed");
     process.exit(0);
   });
-  
+
   // Force exit after timeout
   setTimeout(() => {
-    console.error('Could not close connections in time, forcefully shutting down');
+    console.error(
+      "Could not close connections in time, forcefully shutting down"
+    );
     process.exit(1);
   }, 10000);
 };
 
 // Listen for termination signals
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
 
 // Validation error handling
 app.use(validationErrorHandler);
@@ -450,48 +525,49 @@ const PORT = process.env.PORT || 5001;
 (async () => {
   try {
     console.log(`Starting server on port ${PORT}...`);
-    
+
     // Start HTTP server immediately for Railway health checks
-    server.listen(PORT, '0.0.0.0', async () => {
+    server.listen(PORT, "0.0.0.0", async () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
       console.log(`Health check: http://localhost:${PORT}/api/health`);
-      
+
       // Initialize services after server is listening
       try {
         const initialized = await initializeServices();
         if (initialized) {
-          console.log('✅ Essential services initialized');
+          console.log("✅ Essential services initialized");
         } else {
-          console.warn('⚠️ Running in degraded mode - some services failed to initialize');
+          console.warn(
+            "⚠️ Running in degraded mode - some services failed to initialize"
+          );
         }
       } catch (error) {
-        console.error('⚠️ Service initialization error:', error.message);
-        console.log('Server continues in basic mode');
+        console.error("⚠️ Service initialization error:", error.message);
+        console.log("Server continues in basic mode");
       }
     });
-    
   } catch (error) {
-    console.error('❌ Fatal server startup error:', error);
-    
+    console.error("❌ Fatal server startup error:", error);
+
     // Emergency fallback server
     const express = require("express");
     const cors = require("cors");
     const minimalApp = express();
-    
+
     minimalApp.use(cors({ origin: true, credentials: true }));
     minimalApp.use(express.json());
-    
-    minimalApp.get('/api/health', (req, res) => {
+
+    minimalApp.get("/api/health", (req, res) => {
       res.json({
-        status: 'emergency',
-        message: 'Server running in emergency mode',
+        status: "emergency",
+        message: "Server running in emergency mode",
         timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+        uptime: process.uptime(),
       });
     });
-    
-    minimalApp.listen(PORT, '0.0.0.0', () => {
+
+    minimalApp.listen(PORT, "0.0.0.0", () => {
       console.log(`🚨 Emergency server running on port ${PORT}`);
     });
   }

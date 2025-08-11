@@ -24,6 +24,30 @@ if (!fs.existsSync(indexPath)) {
 
 console.log('✅ index.js found at:', indexPath);
 
+// Check if node_modules exists
+const nodeModulesPath = path.join(__dirname, 'node_modules');
+if (!fs.existsSync(nodeModulesPath)) {
+  console.log('❌ node_modules not found, dependencies may not be installed');
+  console.log('🔄 Attempting to install dependencies...');
+  
+  try {
+    const { execSync } = require('child_process');
+    execSync('npm install', { 
+      cwd: __dirname, 
+      stdio: 'inherit',
+      timeout: 120000 // 2 minute timeout
+    });
+    console.log('✅ Dependencies installed successfully');
+  } catch (error) {
+    console.error('❌ Failed to install dependencies:', error.message);
+    console.log('🚨 Starting emergency fallback server...');
+    startFallbackServer();
+    return;
+  }
+} else {
+  console.log('✅ node_modules found');
+}
+
 // Test if we can require the index.js file (catch ES6 import errors early)
 console.log('🧪 Testing index.js for ES6 import issues...');
 try {
@@ -60,6 +84,18 @@ try {
     startCleanServer();
     return;
   }
+}
+
+// Test if express is available
+console.log('🧪 Testing if express is available...');
+try {
+  require.resolve('express');
+  console.log('✅ Express module found');
+} catch (error) {
+  console.error('❌ Express module not found:', error.message);
+  console.log('🚨 Starting emergency fallback server...');
+  startFallbackServer();
+  return;
 }
 
 // Function to start server with proper error handling
