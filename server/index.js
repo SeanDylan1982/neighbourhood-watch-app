@@ -5,7 +5,7 @@ const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
-require("dotenv").config({ path: require('path').join(__dirname, '.env.local') });
+require("dotenv").config({ path: require('path').join(__dirname, '.env.local', '.env.development' || '.env.production') });
 
 // Database connection
 const connectDB = require("./config/database");
@@ -62,7 +62,7 @@ const io = new Server(server, {
         "https://neighbourhood-watch-app.vercel.app",
         "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
       // Allow any vercel.app subdomain for this project
-      /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/,
+      "/^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
@@ -91,7 +91,7 @@ app.use(
       if (allowedOrigins.includes(origin) || /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/.test(origin)) {
         res.set("Access-Control-Allow-Origin", origin);
       }
-      res.set("Access-Control-Allow-Methods", "GET");
+      res.set("Access-Control-Allow-Methods", "GET", "POST", "PUT", "DELETE", "OPTIONS");
       res.set("Access-Control-Allow-Credentials", "true");
     },
   })
@@ -100,11 +100,7 @@ app.use(
 app.use(
   cors({
     origin:
-      "http://localhost:3000",
-      "http://127.0.0.1:3000":
-      "https://web-production-d1da2.up.railway.app",
-      "https://neighbourhood-watch-app.vercel.app":
-      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app", "https://neighbourhood-watch-app-production.up.railway.app:5001": "https://neighbourhood-watch-app-production.up.railway.app:5001", "https://neighbourwatch-production.up.railway.app:5000": "https://neighbourwatch-production.up.railway.app:5000",
+      "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // if you use cookies/auth headers
   })
@@ -151,26 +147,26 @@ app.use(compression());
 
 
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "https://web-production-d1da2.up.railway.app",
-  "https://neighbourhood-watch-app.vercel.app",
-  "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app" // or whatever port Vite runs on
-];
+// const allowedOrigins = [
+//   "http://localhost:3000",
+//   "http://127.0.0.1:3000",
+//   "https://web-production-d1da2.up.railway.app",
+//   "https://neighbourhood-watch-app.vercel.app",
+//   "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app" // or whatever port Vite runs on
+// ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//   })
+// );
 
 // Body parsing
 app.use(express.json({ limit: "10mb" }));
@@ -244,7 +240,7 @@ app.use(
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
+
       // Allow all origins for now - we'll restrict this later
       return callback(null, true);
     },
@@ -256,7 +252,12 @@ app.use(
       "X-Requested-With",
       "Access-Control-Allow-Origin",
     ],
-    exposedHeaders: ["Authorization"],
+    exposedHeaders: [
+      "Authorization",
+      "Content-Type",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin"
+    ],
     optionsSuccessStatus: 200,
   })
 );
