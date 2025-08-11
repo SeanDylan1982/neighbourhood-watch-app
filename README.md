@@ -1,6 +1,6 @@
 # neibrly
 
-Connect with your neighbors - A comprehensive community-focused platform for neighborhood safety, communication, and local engagement. Built with React, Node.js, PostgreSQL, and Socket.io for real-time features.
+Connect with your neighbours - A comprehensive community-focused platform for neighborhood safety, communication, and local engagement. Built with React, Node.js, PostgreSQL, and Socket.io for real-time features.
 
 ## 🏘️ Features
 
@@ -100,7 +100,7 @@ Connect with your neighbors - A comprehensive community-focused platform for nei
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/SeanDylan1982/neighbourhood-watch-app)
 cd neibrly
 ```
 
