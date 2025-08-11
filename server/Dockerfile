@@ -1,20 +1,17 @@
-# Use Node.js 18 LTS
-FROM node:18-alpine
-
-# Set working directory
+# Stage 1: Build React app
+FROM node:18 AS build
 WORKDIR /app
+COPY client/package*.json ./client/
+RUN cd client && npm install
+COPY client ./client
+RUN cd client && npm run build
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy source code
-COPY . .
-
-# Expose port
-EXPOSE 5000
-
-# Start the application
+# Stage 2: Server
+FROM node:18
+WORKDIR /app
+COPY server/package*.json ./
+RUN npm install
+COPY server ./
+COPY --from=build /app/client/build ./public
 CMD ["npm", "start"]
+
