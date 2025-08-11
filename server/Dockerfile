@@ -1,16 +1,17 @@
 # ===== Stage 1: Build React Client =====
 FROM node:18 AS client-build
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
-RUN npm ci
-RUN npm install react-scripts@5.0.1 -g
 
-# Copy and install client dependencies
+# Copy only client dependency files
 COPY client/package*.json ./client/
+
+# Install client dependencies
 RUN cd client && npm install
 
-# Copy client source and build
+# Copy client source
 COPY client ./client
+
+# Build React app (ESLint safe: only installed once inside client/)
 RUN cd client && npm run build
 
 
@@ -18,18 +19,22 @@ RUN cd client && npm run build
 FROM node:18
 WORKDIR /app
 
-# Copy and install server dependencies
-# Server deps
+# Copy only server dependency files
 COPY server/package*.json ./server/
+
+# Install server dependencies
 RUN cd server && npm install
 
 # Copy server source
 COPY server ./server
 
-# Copy built client into server's public folder
-COPY --from=client-build /app/client/build ./public
+# Copy built client from stage 1 into server's public folder
+COPY --from=client-build /app/client/build ./server/public
 
-# Expose Railway's dynamic port
+# Set working directory to server
+WORKDIR /app/server
+
+# Expose port for Railway
 EXPOSE 5000
 
 # Start server
