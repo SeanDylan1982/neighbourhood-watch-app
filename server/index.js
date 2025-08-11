@@ -57,7 +57,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      process.env.CLIENT_URL || "https://neighbourhood-watch-app.vercel.app", "https://neighbourwatch-development.up.railway.app/",
+      process.env.CLIENT_URL || "https://neighbourhood-watch-app.vercel.app", "https://neighbourhood-watch-app.vercel.app/login", "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
       // Allow any vercel.app subdomain for this project
       "/^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/",
     ],
@@ -81,7 +81,6 @@ app.use(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://neighbourhood-watch-app.vercel.app",
-        "https://neighbourwatch-development.up.railway.app/",
       ];
       const origin = res.req.headers.origin;
       if (allowedOrigins.includes(origin) || /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/.test(origin)) {
@@ -171,7 +170,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/uploads", express.static("uploads"));
 
 // Global middleware
-app.use(timeoutHandler(15000)); // 15 second timeout
+app.use(timeoutHandler(1500)); // 15 second timeout
 app.use(databaseErrorHandler);
 
 // Routes
