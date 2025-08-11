@@ -1,21 +1,31 @@
-// API Configuration
+// API Configuration - COMPLETELY REWRITTEN TO ELIMINATE OLD URLs
+const RAILWAY_API_URL = "https://neighbourwatch-development.up.railway.app";
+const LOCAL_API_URL = "http://localhost:5001";
+
 const getApiUrl = () => {
-  // Production: Force Railway URL
+  // FORCE the correct Railway URL - no concatenation, no fallbacks, no old URLs
   if (process.env.NODE_ENV === "production") {
-    console.log("🚀 Production mode: Using Railway backend URL");
-    return "https://neighbourwatch-development.up.railway.app";
+    console.log("🚀 Production mode: Using FORCED Railway backend URL");
+    return RAILWAY_API_URL;
   }
   
-  // Development: Check environment variable first, then fallback
+  // Development: Use environment variable or Railway URL (NO localhost)
   const envUrl = process.env.REACT_APP_API_URL;
-  if (envUrl && !envUrl.includes("localhost")) {
-    console.log("🔧 Development mode: Using environment variable API URL:", envUrl);
-    return envUrl;
+  if (envUrl) {
+    // VALIDATE the URL to prevent malformed URLs
+    if (envUrl.includes("neighbourwatch-development.up.railway.app")) {
+      console.log("🔧 Development mode: Using validated Railway URL:", envUrl);
+      return envUrl;
+    }
+    if (envUrl.includes("localhost")) {
+      console.log("🏠 Development mode: Using localhost backend");
+      return envUrl;
+    }
   }
   
-  // Default fallback for development
-  console.log("🏠 Development mode: Using default localhost backend");
-  return "http://localhost:5001";
+  // Default to Railway URL (NOT localhost)
+  console.log("🔧 Development mode: Defaulting to Railway backend");
+  return RAILWAY_API_URL;
 };
 
 export const API_BASE_URL = getApiUrl();

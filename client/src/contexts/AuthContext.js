@@ -2,10 +2,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
-// Configure axios base UR
-console.log('🔧 AuthContext - API URL configured as:', API_BASE_URL);
+// FORCE CLEAR any existing axios configuration
+delete axios.defaults.baseURL;
+
+// Configure axios base URL with VALIDATION
+const VALIDATED_API_URL = API_BASE_URL.includes('neighbourwatch-development.up.railway.app') 
+  ? API_BASE_URL 
+  : 'https://neighbourwatch-development.up.railway.app';
+
+console.log('🔧 AuthContext - VALIDATED API URL:', VALIDATED_API_URL);
 console.log('🔧 AuthContext - Environment:', process.env.NODE_ENV);
-axios.defaults.baseURL = API_BASE_URL;
+console.log('🔧 AuthContext - Original API_BASE_URL:', API_BASE_URL);
+
+// Set the validated URL
+axios.defaults.baseURL = VALIDATED_API_URL;
   
 // Add request/response interceptors for debugging
 axios.interceptors.request.use(request => {

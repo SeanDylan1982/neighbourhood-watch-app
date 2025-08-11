@@ -36,7 +36,7 @@ EXPOSE $PORT
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-5000}/api/health || exit 1
+  CMD curl -f http://localhost:${PORT:-5001}/api/health || exit 1
 
 # Start server using railway-start.js
 CMD ["node", "railway-start.js"]
