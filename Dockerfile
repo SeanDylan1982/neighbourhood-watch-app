@@ -1,14 +1,3 @@
-# ===== Backend =====
-FROM node:18 AS server-build
-WORKDIR /app
-
-# Install server deps
-COPY server/package*.json ./server/
-RUN cd server && npm install
-
-# Copy server code
-COPY server ./server
-
 # ===== Frontend =====
 FROM node:18 AS client-build
 WORKDIR /app
@@ -22,6 +11,17 @@ COPY client ./client
 
 # Build client
 RUN cd client && npm run build
+
+# ===== Backend =====
+FROM node:18 AS server-build
+WORKDIR /app
+
+# Install server deps
+COPY server/package*.json ./server/
+RUN cd server && npm install
+
+# Copy server code
+COPY server ./server
 
 # ===== Final =====
 FROM node:18 AS final

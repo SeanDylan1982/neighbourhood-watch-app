@@ -4,7 +4,7 @@
   "description": "Neighbourhood Watch Application - Full Stack",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && PORT=5004 npm start",
+    "server": "cd server && PORT=5001 npm start",
     "client": "cd client && npm start",
     "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
     "server:dev": "cd server && npm run dev",
