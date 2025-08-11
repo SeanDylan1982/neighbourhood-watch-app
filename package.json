@@ -12,7 +12,7 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install && npm run build",
+    "install-all": "cd client && npm install && cd ../server && npm install && cd ../scripts && npm install && cd ../.github/workflows && npm install && cd ../../ && npm install && cd scripts && npm install && cd ../server && npm install && cd ../client && npm install && npm run build",
     "reset": "node scripts/port-manager.js reset",
     "kill": "node scripts/port-manager.js kill",
     "test-ports": "node scripts/port-manager.js test"
