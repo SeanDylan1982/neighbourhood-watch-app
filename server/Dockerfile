@@ -1,8 +1,7 @@
 # ===== Stage 1: Build React Client =====
 FROM node:18 AS client-build
 WORKDIR /app
-
-RUN chmod +x node_modules/.bin/react-scripts
+ENV PATH /app/node_modules/.bin:$PATH
 
 # Copy and install client dependencies
 COPY client/package*.json ./client/
