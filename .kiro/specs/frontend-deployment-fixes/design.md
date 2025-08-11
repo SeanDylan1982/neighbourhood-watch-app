@@ -10,38 +10,60 @@ This design addresses critical frontend deployment issues affecting the producti
 
 Based on the console logs and code analysis, the following issues have been identified:
 
-1. **Service Worker MIME Type Error**: The service worker is being served with `text/html` MIME type instead of `application/javascript`
-2. **Audio Loading Failures**: All notification sounds are failing to load with `EncodingError: Unable to decode audio data`
-3. **Manifest Syntax Error**: The manifest.json has parsing issues
-4. **Missing Error Boundaries**: Lack of graceful error handling for production failures
+1. **ESLint Configuration Conflict**: Plugin "react" is conflicted between root and client package.json ESLint configurations
+2. **Service Worker MIME Type Error**: The service worker is being served with `text/html` MIME type instead of `application/javascript`
+3. **Audio Loading Failures**: All notification sounds are failing to load with `EncodingError: Unable to decode audio data`
+4. **Manifest Syntax Error**: The manifest.json has parsing issues
+5. **Missing Error Boundaries**: Lack of graceful error handling for production failures
 
 ### Solution Architecture
 
 ```mermaid
 graph TD
-    A[Frontend Application] --> B[Service Worker Manager]
-    A --> C[Audio Manager]
-    A --> D[Manifest Validator]
-    A --> E[Error Handler]
+    A[Frontend Application] --> B[Build Configuration]
+    A --> C[Service Worker Manager]
+    A --> D[Audio Manager]
+    A --> E[Manifest Validator]
+    A --> F[Error Handler]
     
-    B --> F[SW Registration]
-    B --> G[Cache Management]
-    B --> H[Offline Support]
+    B --> G[ESLint Config Fix]
+    B --> H[Package Dependencies]
+    B --> I[Build Scripts]
     
-    C --> I[Audio Context]
-    C --> J[Sound Loading]
-    C --> K[Fallback Sounds]
+    C --> J[SW Registration]
+    C --> K[Cache Management]
+    C --> L[Offline Support]
     
-    D --> L[Manifest Validation]
-    D --> M[PWA Features]
+    D --> M[Audio Context]
+    D --> N[Sound Loading]
+    D --> O[Fallback Sounds]
     
-    E --> N[Error Logging]
-    E --> O[Graceful Degradation]
+    E --> P[Manifest Validation]
+    E --> Q[PWA Features]
+    
+    F --> R[Error Logging]
+    F --> S[Graceful Degradation]
 ```
 
 ## Components and Interfaces
 
-### 1. Service Worker Manager
+### 1. Build Configuration Manager
+
+**Purpose**: Fix ESLint configuration conflicts and ensure clean builds.
+
+**Key Features**:
+- Resolve ESLint plugin conflicts between root and client directories
+- Standardize build scripts across environments
+- Ensure proper dependency management
+- Configure appropriate ESLint settings for production builds
+
+**Solution**:
+- Remove duplicate `react-scripts` dependency from root package.json
+- Update root build script to use `DISABLE_ESLINT_PLUGIN=true`
+- Ensure ESLint configuration is only defined in client directory
+- Clean up conflicting dependencies
+
+### 2. Service Worker Manager
 
 **Purpose**: Handle service worker registration with proper error handling and MIME type validation.
 

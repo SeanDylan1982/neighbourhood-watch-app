@@ -51,13 +51,17 @@
   - Implement integration tests for production deployment scenarios
   - _Requirements: 1.1, 2.1, 3.1, 4.1_
 
-- [ ] 7. Update deployment configuration
+- [-] 7. Fix ESLint configuration conflicts and build issues
 
+  - Remove duplicate react-scripts dependency from root package.json
+  - Update root build script to include DISABLE_ESLINT_PLUGIN=true
+  - Ensure ESLint configuration is only defined in client directory
+  - Clean up conflicting ESLint dependencies and configurations
+  - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-
-
+- [ ] 8. Update deployment configuration
   - Configure proper MIME types for service worker in deployment
   - Add audio file validation to build process
   - Update manifest.json with correct syntax and paths
   - Configure error monitoring for production environment
-  - _Requirements: 1.1, 2.1, 3.1, 4.1_
+  - _Requirements: 1.1, 2.1, 3.1, 4.1, 6.1_
