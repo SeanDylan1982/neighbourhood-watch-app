@@ -1,33 +1,15 @@
 # ===== Stage 1: Build React Client =====
 FROM node:18 AS client-build
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
 
-# Copy and install client dependencies
+# Copy client package files first for cache efficiency
 COPY client/package*.json ./client/
+
+# Install client dependencies
 RUN cd client && npm install
 
-# Copy client source and build
+# Copy the rest of the client source
 COPY client ./client
+
+# Build the client
 RUN cd client && npm run build
-
-
-# ===== Stage 2: Server =====
-FROM node:18
-WORKDIR /app
-
-# Copy and install server dependencies
-COPY server/package*.json ./
-RUN npm install
-
-# Copy server source
-COPY server ./
-
-# Copy built client into server's public folder
-COPY --from=client-build /app/client/build ./public
-
-# Expose Railway's dynamic port
-EXPOSE 5000
-
-# Start server
-CMD ["npm", "start"]
