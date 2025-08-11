@@ -5,11 +5,14 @@
   "main": "server/index.js",
   "scripts": {
     "start": "cd server && node railway-start.js",
-    "build": "echo 'Backend-only deployment - no build step needed'",
+    "build": "react-scripts build && npm run validate-assets",
+    "build:prod": "CI=false react-scripts build && npm run validate-assets && npm run copy-assets",
+    "validate-assets": "node scripts/validate-assets.js",
+    "copy-assets": "node scripts/copy-assets.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install && npm run build:prod",
     "reset": "node scripts/port-manager.js reset",
     "kill": "node scripts/port-manager.js kill",
     "test-ports": "node scripts/port-manager.js test"
