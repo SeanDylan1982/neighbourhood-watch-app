@@ -149,49 +149,7 @@ app.use(compression());
 
 // app.use(limiter); // DISABLED
 
-// CORS - Allow all origins for now to fix deployment issues
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      // Allow all origins for now - we'll restrict this later
-      return callback(null, true);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Access-Control-Allow-Origin",
-    ],
-    exposedHeaders: ["Authorization"],
-    optionsSuccessStatus: 200,
-  })
-);
 
-// Additional CORS headers for preflight requests
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
-
-app.options("*", cors());
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -279,6 +237,50 @@ app.set('io', io);
 
 // Socket.io setup
 setupSocketHandlers(io);
+
+// CORS - Allow all origins for now to fix deployment issues
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Allow all origins for now - we'll restrict this later
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin",
+    ],
+    exposedHeaders: ["Authorization"],
+    optionsSuccessStatus: 200,
+  })
+);
+
+// Additional CORS headers for preflight requests
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
+app.options("*", cors());
 
 /**
  * Initialize essential services quickly for Railway startup
