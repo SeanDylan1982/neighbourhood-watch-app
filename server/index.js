@@ -104,7 +104,7 @@ app.use(
       "http://127.0.0.1:3000":
       "https://web-production-d1da2.up.railway.app",
       "https://neighbourhood-watch-app.vercel.app":
-      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app",
+      "https://neighbourhood-watch-app-sean-pattersons-projects-5128ccfa.vercel.app", "https://neighbourhood-watch-app-production.up.railway.app": "https://neighbourhood-watch-app-production.up.railway.app",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // if you use cookies/auth headers
   })
