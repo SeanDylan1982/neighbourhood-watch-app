@@ -38,13 +38,18 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cd server && node railway-start.js",
     "build": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run validate-assets",
     "build:prod": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run validate-assets && npm run copy-assets",
     "validate-assets": "node scripts/validate-assets.js",
     "copy-assets": "node scripts/copy-assets.js",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-all": "cd client && npm install && npm run build",
+    "reset": "node scripts/port-manager.js reset",
+    "kill": "node scripts/port-manager.js kill",
+    "test-ports": "node scripts/port-manager.js test"
   },
   "eslintConfig": {
     "extends": [
