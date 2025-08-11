@@ -184,6 +184,20 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Serve static files (uploads)
 app.use("/uploads", express.static("uploads"));
 
+// Serve static client files (for production)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'public')));
+  
+  // Handle React Router - send all non-API requests to index.html
+  app.get('*', (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+}
+
 // Global middleware
 app.use(timeoutHandler(1500)); // 15 second timeout
 app.use(databaseErrorHandler);
