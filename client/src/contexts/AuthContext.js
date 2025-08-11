@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
-// Configure axios base URL
+// Configure axios base UR
 console.log('🔧 AuthContext - API URL configured as:', API_BASE_URL);
 console.log('🔧 AuthContext - Environment:', process.env.NODE_ENV);
 axios.defaults.baseURL = API_BASE_URL;
