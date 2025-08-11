@@ -2,6 +2,8 @@
 FROM node:18 AS client-build
 WORKDIR /app
 
+RUN chmod +x node_modules/.bin/react-scripts
+
 # Copy and install client dependencies
 COPY client/package*.json ./client/
 RUN cd client && npm install
