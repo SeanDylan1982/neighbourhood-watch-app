@@ -100,7 +100,7 @@ Connect with your neighbours - A comprehensive community-focused platform for ne
 
 1. **Clone the repository**
 ```bash
-git clone [<repository-url>](https://github.com/SeanDylan1982/neighbourhood-watch-app)
+git clone https://github.com/SeanDylan1982/neighbourhood-watch-app
 cd neibrly
 ```
 
