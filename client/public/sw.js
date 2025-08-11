@@ -1,162 +1,205 @@
-// Enhanced service worker for neibrly app with better error handling
-const CACHE_NAME = "neibrly-v1.1";
-const STATIC_CACHE = "neibrly-static-v1.1";
-const DYNAMIC_CACHE = "neibrly-dynamic-v1.1";
-
-// Essential files to cache
-const STATIC_ASSETS = [
+// Service Worker for Push Notifications
+const CACHE_NAME = "neighborhood-app-v1";
+const urlsToCache = [
   "/",
+  "/static/js/bundle.js",
   "/static/css/main.css",
-  "/manifest.json",
-  "/favicon.ico",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
 ];
 
-// Install event - cache essential resources
-self.addEventListener("install", function (event) {
-  console.log("🔧 Service Worker: Installing...");
-
+// Install event
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE)
-      .then(function (cache) {
-        console.log("📦 Service Worker: Caching static assets");
-        return cache.addAll(
-          STATIC_ASSETS.map((url) => new Request(url, { cache: "reload" }))
-        );
-      })
-      .then(() => {
-        console.log("✅ Service Worker: Installation complete");
-        return self.skipWaiting(); // Activate immediately
-      })
-      .catch((error) => {
-        console.error("❌ Service Worker: Installation failed", error);
-      })
-  );
-});
-
-// Activate event - clean up old caches
-self.addEventListener("activate", function (event) {
-  console.log("🚀 Service Worker: Activating...");
-
-  event.waitUntil(
-    caches
-      .keys()
-      .then(function (cacheNames) {
-        return Promise.all(
-          cacheNames.map(function (cacheName) {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log("🗑️ Service Worker: Deleting old cache", cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
-      .then(() => {
-        console.log("✅ Service Worker: Activation complete");
-        return self.clients.claim(); // Take control immediately
-      })
-  );
-});
-
-// Fetch event - serve from cache with network fallback
-self.addEventListener("fetch", function (event) {
-  // Skip non-GET requests
-  if (event.request.method !== "GET") {
-    return;
-  }
-
-  // Skip chrome-extension and other non-http requests
-  if (!event.request.url.startsWith("http")) {
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then(function (cachedResponse) {
-      // Return cached version if available
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      // Clone the request because it's a stream
-      const fetchRequest = event.request.clone();
-
-      return fetch(fetchRequest)
-        .then(function (response) {
-          // Check if valid response
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== "basic"
-          ) {
-            return response;
-          }
-
-          // Clone the response because it's a stream
-          const responseToCache = response.clone();
-
-          // Cache dynamic content
-          caches.open(DYNAMIC_CACHE).then(function (cache) {
-            cache.put(event.request, responseToCache);
-          });
-
-          return response;
-        })
-        .catch(function (error) {
-          console.warn(
-            "🌐 Service Worker: Fetch failed, serving offline fallback",
-            error
-          );
-
-          // Return offline fallback for navigation requests
-          if (event.request.destination === "document") {
-            return caches.match("/");
-          }
-
-          // For other requests, just fail gracefully
-          return new Response("Offline", {
-            status: 503,
-            statusText: "Service Unavailable",
-          });
-        });
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(urlsToCache);
     })
   );
 });
 
-// Handle messages from the main thread
-self.addEventListener("message", function (event) {
-  console.log("📨 Service Worker: Received message", event.data);
+// Fetch event
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      // Return cached version or fetch from network
+      return response || fetch(event.request);
+    })
+  );
+});
 
+// Push event
+self.addEventListener("push", (event) => {
+  console.log("Push event received:", event);
+
+  let notificationData = {
+    title: "New Notification",
+    body: "You have a new notification",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/badge-72x72.png",
+    tag: "default",
+    requireInteraction: false,
+    vibrate: [200, 100, 200],
+    actions: [
+      {
+        action: "view",
+        title: "View",
+        icon: "/icons/view-icon.png",
+      },
+      {
+        action: "dismiss",
+        title: "Dismiss",
+        icon: "/icons/dismiss-icon.png",
+      },
+    ],
+  };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      notificationData = {
+        ...notificationData,
+        ...data,
+        data: data, // Store original data for click handling
+      };
+    } catch (error) {
+      console.error("Error parsing push data:", error);
+      notificationData.body = event.data.text() || notificationData.body;
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, notificationData)
+  );
+});
+
+// Notification click event
+self.addEventListener("notificationclick", (event) => {
+  console.log("Notification clicked:", event);
+
+  event.notification.close();
+
+  const notificationData = event.notification.data || {};
+  const action = event.action;
+
+  if (action === "dismiss") {
+    return;
+  }
+
+  // Determine URL based on notification type
+  let targetUrl = "/";
+
+  if (notificationData.type) {
+    switch (notificationData.type) {
+      case "friendRequest":
+        targetUrl = "/contacts?tab=friends";
+        break;
+      case "message":
+      case "privateMessage":
+        targetUrl = notificationData.chatId
+          ? `/private-chat/${notificationData.chatId}`
+          : "/private-chat";
+        break;
+      case "notice":
+        targetUrl = notificationData.referenceId
+          ? `/notices/${notificationData.referenceId}`
+          : "/notices";
+        break;
+      case "report":
+        targetUrl = notificationData.referenceId
+          ? `/reports/${notificationData.referenceId}`
+          : "/reports";
+        break;
+      case "like":
+      case "comment":
+        targetUrl = notificationData.referenceId
+          ? `/notices/${notificationData.referenceId}`
+          : "/dashboard";
+        break;
+      default:
+        targetUrl = "/notifications";
+    }
+  }
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin)) {
+            // Focus existing window and navigate
+            client.focus();
+            client.postMessage({
+              type: "NOTIFICATION_CLICK",
+              url: targetUrl,
+              data: notificationData,
+            });
+            return;
+          }
+        }
+
+        // Open new window if app is not open
+        return clients.openWindow(self.location.origin + targetUrl);
+      })
+  );
+});
+
+// Background sync for offline notifications
+self.addEventListener("sync", (event) => {
+  if (event.tag === "background-notification-sync") {
+    event.waitUntil(
+      // Sync any pending notifications when back online
+      syncPendingNotifications()
+    );
+  }
+});
+
+async function syncPendingNotifications() {
+  try {
+    // Check for pending notifications in IndexedDB or localStorage
+    const pendingNotifications = await getPendingNotifications();
+
+    for (const notification of pendingNotifications) {
+      await self.registration.showNotification(
+        notification.title,
+        notification.options
+      );
+    }
+
+    // Clear pending notifications after showing
+    await clearPendingNotifications();
+  } catch (error) {
+    console.error("Error syncing pending notifications:", error);
+  }
+}
+
+async function getPendingNotifications() {
+  // Implementation would depend on your offline storage strategy
+  return [];
+}
+
+async function clearPendingNotifications() {
+  // Implementation would depend on your offline storage strategy
+}
+
+// Handle message from main thread
+self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-// Handle push notifications (if needed)
-self.addEventListener("push", function (event) {
-  if (event.data) {
-    const data = event.data.json();
-    console.log("🔔 Service Worker: Push notification received", data);
-
-    const options = {
-      body: data.body,
-      icon: "/favicon.ico",
-      badge: "/favicon.ico",
-      data: data.data || {},
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(data.title || "Neibrly", options)
-    );
-  }
+// Activate event
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
 });
-
-// Handle notification clicks
-self.addEventListener("notificationclick", function (event) {
-  console.log("👆 Service Worker: Notification clicked", event.notification);
-
-  event.notification.close();
-
-  event.waitUntil(clients.openWindow("/"));
-});
-
-console.log("🎯 Service Worker: Script loaded successfully");
