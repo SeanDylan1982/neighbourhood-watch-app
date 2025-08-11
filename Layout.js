@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/react";
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Box, useTheme, useMediaQuery } from "@mui/material";
@@ -50,7 +49,6 @@ const Layout = () => {
         isSidebarCollapsed={sidebarCollapsed}
         onSidebarCollapseToggle={handleSidebarCollapseToggle}
       />
-      <Analytics />
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {!isMobile && (
           <Sidebar

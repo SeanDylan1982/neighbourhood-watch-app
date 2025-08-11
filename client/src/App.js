@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/react";
 import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -208,7 +207,6 @@ function App() {
                           path="/"
                           element={
                             <ProtectedRoute>
-                              <Analytics />
                               <Layout />
                             </ProtectedRoute>
                           }
