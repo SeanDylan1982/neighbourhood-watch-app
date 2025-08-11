@@ -10,7 +10,7 @@ RUN cd client && npm install
 COPY client ./client
 
 # Build client
-RUN cd client && npm run install:all
+RUN cd client && npm run build
 
 # ===== Backend =====
 FROM node:18 AS server-build
