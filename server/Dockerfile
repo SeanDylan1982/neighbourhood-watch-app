@@ -1,6 +1,9 @@
 # ===== Stage 1: Build React Client =====
 FROM node:18 AS client-build
 WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
+RUN npm ci
+RUN npm install react-scripts@5.0.1 -g
 
 # Copy and install client dependencies
 COPY client/package*.json ./client/
