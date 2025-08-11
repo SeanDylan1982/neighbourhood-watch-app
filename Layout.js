@@ -50,7 +50,7 @@ const Layout = () => {
         isSidebarCollapsed={sidebarCollapsed}
         onSidebarCollapseToggle={handleSidebarCollapseToggle}
       />
-
+      <Analytics />
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {!isMobile && (
           <Sidebar
