@@ -23,6 +23,9 @@ WORKDIR /app
 COPY server/package*.json ./server/
 RUN cd server && npm install
 
+# Copy server source
+COPY server ./server
+
 # Copy built client into server's public folder
 COPY --from=client-build /app/client/build ./public
 
