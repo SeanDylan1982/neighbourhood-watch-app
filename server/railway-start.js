@@ -71,17 +71,35 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Basic health check for Railway
+// Basic health check for Railway - minimal response
 app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || "development",
-    port: process.env.PORT || 5001,
-    services: "basic",
-    railway: true
-  });
+  try {
+    res.status(200).json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || "development",
+      port: process.env.PORT || 5001,
+      services: "minimal",
+      railway: true,
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+      }
+    });
+  } catch (error) {
+    console.error("Health check error:", error);
+    res.status(500).json({
+      status: "error",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// HEAD request for health check (Railway might use this)
+app.head("/api/health", (req, res) => {
+  res.status(200).end();
 });
 
 // Root endpoint
@@ -90,8 +108,22 @@ app.get("/", (req, res) => {
     message: "Neighbourhood Watch API",
     status: "running",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development"
+    environment: process.env.NODE_ENV || "development",
+    version: "1.0.0"
   });
+});
+
+// Additional health check endpoints that Railway might check
+app.get("/health", (req, res) => {
+  res.redirect("/api/health");
+});
+
+app.get("/healthz", (req, res) => {
+  res.redirect("/api/health");
+});
+
+app.get("/ping", (req, res) => {
+  res.json({ pong: true, timestamp: new Date().toISOString() });
 });
 
 // Initialize Socket.IO
@@ -137,16 +169,9 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Railway server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/api/health`);
   
-  // Initialize full application after server is running
-  setTimeout(() => {
-    console.log("🔄 Initializing full application...");
-    try {
-      require('./index.js');
-    } catch (error) {
-      console.error("❌ Failed to initialize full application:", error.message);
-      console.log("✅ Continuing with basic server");
-    }
-  }, 1000);
+  // Log successful startup
+  console.log("✅ Basic Railway server is ready");
+  console.log("🔄 Health check endpoint available at /api/health");
 });
 
 // Graceful shutdown
