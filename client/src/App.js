@@ -208,6 +208,7 @@ function App() {
                           path="/"
                           element={
                             <ProtectedRoute>
+                              <Analytics />
                               <Layout />
                             </ProtectedRoute>
                           }
