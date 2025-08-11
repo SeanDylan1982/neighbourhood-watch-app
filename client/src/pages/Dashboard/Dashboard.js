@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import icons from "../../components/Common/Icons";
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";

@@ -1,6 +1,6 @@
 // Simple debug script to test admin endpoints
 // Run this in the browser console when logged in as admin
-
+import { Analytics } from "@vercel/analytics/next";
 async function testAdminEndpoints() {
   const token = localStorage.getItem('token');
   if (!token) {
