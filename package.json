@@ -5,8 +5,8 @@
   "main": "server/index.js",
   "scripts": {
     "start": "cd server && node railway-start.js",
-    "build": "react-scripts build && npm run validate-assets",
-    "build:prod": "CI=false react-scripts build && npm run validate-assets && npm run copy-assets",
+    "build": "react-scripts build && npm run validate-assets && npm run copy-assets",
+    "build:prod": "react-scripts build && npm run validate-assets && npm run copy-assets",
     "validate-assets": "node scripts/validate-assets.js",
     "copy-assets": "node scripts/copy-assets.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -28,16 +28,5 @@
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.2.0",
-    "@mui/material": "^7.2.0",
-    "@mui/styled-engine-sc": "^7.2.0",
-    "animated-fluent-emojis": "^0.1.2",
-    "form-data": "^4.0.4",
-    "node-fetch": "^3.3.2",
-    "styled-components": "^6.1.19"
   }
 }
