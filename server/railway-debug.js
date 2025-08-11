@@ -6,7 +6,7 @@
 
 const http = require("http");
 
-const PORT = process.env.PORT || 5001;
+const PORT = 5001;
 
 console.log("🚀 Starting Railway debug server...");
 console.log(`Port: ${PORT}`);
