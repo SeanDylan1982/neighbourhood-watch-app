@@ -5,13 +5,8 @@ const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
-require("dotenv").config({
-  path: require("path").join(
-    __dirname,
-    ".env.local",
-    ".env.development" || ".env.production"
-  ),
-});
+// Load environment variables
+require("dotenv").config();
 
 // Database connection
 const connectDB = require("./config/database");
@@ -80,41 +75,61 @@ const io = new Server(server, {
   },
 });
 
-app.use(
-  "/uploads",
-  express.static("uploads", {
-    setHeaders: (res, path, stat) => {
-      // Allow multiple origins for uploads
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://neighbourhood-watch-app.vercel.app",
-      ];
-      const origin = res.req.headers.origin;
-      if (
-        allowedOrigins.includes(origin) ||
-        /^https:\/\/neighbourhood-watch-app.*\.vercel\.app$/.test(origin)
-      ) {
-        res.set("Access-Control-Allow-Origin", origin);
-      }
-      res.set(
-        "Access-Control-Allow-Methods",
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-        "OPTIONS"
-      );
-      res.set("Access-Control-Allow-Credentials", "true");
-    },
-  })
-);
-
-// CORS configuration removed - using the comprehensive one below
+// Serve static files (uploads)
+app.use("/uploads", express.static("uploads"));
 
 // Security middleware
 app.use(helmet());
 app.use(compression());
+
+// CORS configuration - Single comprehensive setup
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Allow Vercel deployments
+      if (
+        origin.includes("vercel.app") ||
+        origin.includes("neighbourhood-watch-app")
+      ) {
+        return callback(null, true);
+      }
+
+      // Allow localhost for development
+      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+        return callback(null, true);
+      }
+
+      // Allow Railway deployment
+      if (origin.includes("railway.app")) {
+        return callback(null, true);
+      }
+
+      // Allow all origins for now to fix deployment issues
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin",
+      "Accept",
+      "Origin",
+    ],
+    exposedHeaders: [
+      "Authorization",
+      "Content-Type",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin",
+    ],
+    optionsSuccessStatus: 200,
+    preflightContinue: false,
+  })
+);
 
 // Rate limiting configuration - DISABLED FOR DEVELOPMENT
 // const RATE_LIMIT_WINDOW = parseInt(process.env.RATE_LIMIT_WINDOW_MS || (15 * 60 * 1000)); // 15 minutes
@@ -175,25 +190,8 @@ app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Serve static files (uploads)
-app.use("/uploads", express.static("uploads"));
-
-// Serve static client files (for production)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'public')));
-  
-  // Handle React Router - send all non-API requests to index.html
-  app.get('*', (req, res) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'API endpoint not found' });
-    }
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-}
-
 // Global middleware
-app.use(timeoutHandler(1500)); // 15 second timeout
+app.use(timeoutHandler(15000)); // 15 second timeout
 app.use(databaseErrorHandler);
 
 // Routes
@@ -282,71 +280,6 @@ app.set("io", io);
 
 // Socket.io setup
 setupSocketHandlers(io);
-
-// COMPREHENSIVE CORS CONFIGURATION - Allow Vercel frontend
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      // Allow Vercel deployments
-      if (origin.includes('vercel.app') || origin.includes('neighbourhood-watch-app')) {
-        return callback(null, true);
-      }
-
-      // Allow localhost for development
-      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        return callback(null, true);
-      }
-
-      // Allow all origins for now to fix deployment issues
-      return callback(null, true);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Access-Control-Allow-Origin",
-      "Accept",
-      "Origin"
-    ],
-    exposedHeaders: [
-      "Authorization",
-      "Content-Type",
-      "X-Requested-With",
-      "Access-Control-Allow-Origin",
-    ],
-    optionsSuccessStatus: 200,
-    preflightContinue: false
-  })
-);
-
-// Additional CORS headers for preflight requests - ENHANCED WITH DEBUGGING
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Debug logging
-  console.log(`🔧 CORS Request: ${req.method} ${req.url} from origin: ${origin}`);
-  
-  // Set CORS headers for all requests - ALWAYS ALLOW
-  res.header("Access-Control-Allow-Origin", origin || "*");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
-  res.header("Access-Control-Max-Age", "86400"); // 24 hours
-
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    console.log(`🔧 CORS Preflight Response: 200 OK for ${origin} -> ${req.url}`);
-    res.status(200).end();
-    return;
-  }
-  
-  next();
-});
 
 // __dirname is available in CommonJS
 

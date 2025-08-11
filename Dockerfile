@@ -35,4 +35,4 @@ COPY --from=client-build /app/client/build ./server/public
 
 WORKDIR /app/server
 
-CMD ["npm", "start"]
+CMD ["node", "railway-start.js"]
