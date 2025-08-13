@@ -32,6 +32,7 @@
     "node-fetch": "^3.3.2",
     "socket.io": "^4.7.4",
     "socketio": "^1.0.0",
+    "supertest": "^7.1.4",
     "web-push": "^3.6.7"
   },
   "devDependencies": {

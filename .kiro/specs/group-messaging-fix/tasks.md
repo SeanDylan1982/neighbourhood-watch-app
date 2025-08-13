@@ -1,6 +1,7 @@
 # Implementation Plan
 
-- [-] 1. Fix core route populate field reference issue
+- [x] 1. Fix core route populate field reference issue
+
 
   - Update group messages route to use correct populate field `replyTo.messageId` instead of `replyToId`
   - Add comprehensive error logging with request context
@@ -8,6 +9,8 @@
   - _Requirements: 1.1, 1.2, 1.3, 5.1, 5.2_
 
 - [ ] 2. Standardize message response format and field mapping
+
+
   - Ensure consistent attachment field mapping between `media` and `attachments`
   - Add proper null handling for optional fields like `replyTo` and `senderAvatar`
   - Maintain backward compatibility with legacy field names

@@ -140,40 +140,47 @@ router.get('/groups/:groupId/messages', [
 
     console.log('Messages fetched successfully:', messages.length);
 
-    // Format messages
+    // Format messages with proper null handling and field mapping
     const formattedMessages = messages.map(msg => ({
       id: msg._id,
       content: msg.content,
       type: msg.messageType,
       messageType: msg.messageType, // Legacy support
-      media: msg.media,
-      attachments: msg.media, // Map media to attachments for frontend compatibility
+      media: msg.media || [], // Ensure array for media
+      attachments: msg.media || [], // Map media to attachments for frontend compatibility
       senderId: msg.senderId._id,
       senderName: `${msg.senderId.firstName} ${msg.senderId.lastName}`,
-      senderAvatar: msg.senderId.profileImageUrl,
-      replyTo: msg.replyToId ? {
-        id: msg.replyToId._id,
-        content: msg.replyToId.content,
-        senderId: msg.replyToId.senderId
-      } : null,
-      reactions: msg.reactions.map(r => ({
+      senderAvatar: msg.senderId.profileImageUrl || null, // Proper null handling
+      replyTo: msg.replyTo && msg.replyTo.messageId ? {
+        id: msg.replyTo.messageId._id,
+        content: msg.replyTo.messageId.content,
+        senderId: msg.replyTo.messageId.senderId
+      } : null, // Fixed: use msg.replyTo instead of msg.replyToId
+      reactions: msg.reactions ? msg.reactions.map(r => ({
         type: r.type,
         count: r.count,
         users: r.users
-      })),
-      isEdited: msg.isEdited,
-      isForwarded: msg.isForwarded,
-      forwardedFrom: msg.forwardedFrom,
-      status: msg.status,
+      })) : [], // Ensure array for reactions
+      isEdited: msg.isEdited || false,
+      isForwarded: msg.isForwarded || false,
+      forwardedFrom: msg.forwardedFrom || null,
+      status: msg.status || 'sent',
       createdAt: msg.createdAt,
       updatedAt: msg.updatedAt,
       timestamp: msg.createdAt // Add timestamp for frontend compatibility
     })).reverse(); // Reverse to show oldest first
 
+    console.log('Formatted messages:', formattedMessages.length);
     res.json(formattedMessages);
   } catch (error) {
-    console.error('Get messages error:', error);
-    res.status(500).json({ message: 'Server error' });
+    logError(error, requestContext);
+    res.status(500).json({ 
+      message: 'Server error',
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        context: requestContext 
+      })
+    });
   }
 });
 
