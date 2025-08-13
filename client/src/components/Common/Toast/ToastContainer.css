@@ -2,8 +2,12 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 9999;
+  z-index: 10000;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 480px;
 }
 
 .toast-container > * {
@@ -15,10 +19,30 @@
     top: 10px;
     right: 10px;
     left: 10px;
+    max-width: none;
   }
   
   .toast {
     min-width: auto;
     max-width: none;
   }
+}
+
+/* Ensure toasts appear above Material-UI components */
+@media (min-width: 769px) {
+  .toast-container {
+    width: 480px;
+  }
+}
+
+/* Ensure toasts appear above all Material-UI components including modals */
+.toast-container {
+  z-index: 10000 !important;
+}
+
+/* Handle cases where MUI components might have high z-index */
+.MuiModal-root ~ .toast-container,
+.MuiDialog-root ~ .toast-container,
+.MuiDrawer-root ~ .toast-container {
+  z-index: 10001 !important;
 }

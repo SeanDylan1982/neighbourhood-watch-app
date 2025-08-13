@@ -26,6 +26,7 @@ import AdminStats from '../../components/Admin/AdminStats';
 import DatabaseHealth from '../../components/Admin/DatabaseHealth';
 import DatabaseAlerts from '../../components/Admin/DatabaseAlerts';
 import DatabaseHealthIndicator from '../../components/Common/DatabaseHealthIndicator';
+import ToastTest from '../../components/Admin/ToastTest';
 import useApi from '../../hooks/useApi';
 
 const AdminDashboard = () => {
@@ -215,6 +216,11 @@ const AdminDashboard = () => {
               icon={<HistoryIcon />} 
               iconPosition="start"
             />
+            <Tab 
+              label="Toast Test" 
+              icon={<NotificationsIcon />} 
+              iconPosition="start"
+            />
           </Tabs>
         </Box>
 
@@ -233,6 +239,7 @@ const AdminDashboard = () => {
             </Grid>
           )}
           {activeTab === 4 && <AuditLog />}
+          {activeTab === 5 && <ToastTest />}
         </Box>
       </Card>
     </Box>

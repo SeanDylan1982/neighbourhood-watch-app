@@ -13,13 +13,32 @@ export const useToast = () => {
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = useCallback((toast) => {
+  const hideToast = useCallback((id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
+  const showToast = useCallback((messageOrToast, type = 'info', duration = 5000) => {
     const id = Date.now().toString();
+    
+    // Handle both object format and separate parameters format
+    let toastConfig;
+    if (typeof messageOrToast === 'string') {
+      // Legacy format: showToast(message, type, duration)
+      toastConfig = {
+        message: messageOrToast,
+        type,
+        duration
+      };
+    } else {
+      // Object format: showToast({ message, type, duration, ... })
+      toastConfig = messageOrToast;
+    }
+    
     const newToast = {
       id,
       type: 'info',
       duration: 5000,
-      ...toast,
+      ...toastConfig,
       timestamp: new Date(),
       dismissed: false
     };
@@ -34,11 +53,7 @@ export const ToastProvider = ({ children }) => {
     }
 
     return id;
-  }, []);
-
-  const hideToast = useCallback((id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  }, [hideToast]);
 
   const clearAll = useCallback(() => {
     setToasts([]);

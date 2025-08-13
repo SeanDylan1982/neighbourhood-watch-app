@@ -7,6 +7,7 @@ const ChatGroup = require('../models/ChatGroup');
 const Message = require('../models/Message');
 const AuditLog = require('../models/AuditLog');
 const AuditService = require('../services/AuditService');
+const FlaggedContentService = require('../services/FlaggedContentService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { requireAdmin } = require('../middleware/adminAuth');
 
@@ -446,67 +447,34 @@ router.get('/content/test', async (req, res) => {
   }
 });
 
-// Get flagged content - use same data as dashboard
+// Get flagged content using FlaggedContentService
 router.get('/content/flagged', async (req, res) => {
   try {
-    // Get flagged notices and reports
-    const notices = await Notice.find({ isFlagged: true })
-      .populate('authorId', 'firstName lastName')
-      .select('title content authorId createdAt')
-      .lean();
-      
-    const reports = await Report.find({ isFlagged: true })
-      .populate('reporterId', 'firstName lastName')
-      .select('title description reporterId createdAt')
-      .lean();
-
-    // Format for display
-    const content = [
-      ...notices.map(item => ({
-        id: item._id,
-        contentType: 'notice',
-        title: item.title,
-        content: item.content,
-        author: item.authorId,
-        reports: [{ reason: 'Flagged', reportedBy: { firstName: 'System' }, reportedAt: new Date() }],
-        reportCount: 1,
-        createdAt: item.createdAt,
-        flaggedAt: item.createdAt,
-        status: 'active'
-      })),
-      ...reports.map(item => ({
-        id: item._id,
-        contentType: 'report',
-        title: item.title,
-        content: item.description,
-        author: item.reporterId,
-        reports: [{ reason: 'Flagged', reportedBy: { firstName: 'System' }, reportedAt: new Date() }],
-        reportCount: 1,
-        createdAt: item.createdAt,
-        flaggedAt: item.createdAt,
-        status: 'active'
-      }))
-    ];
-
-    res.json({
-      content,
-      total: content.length,
-      page: 1,
-      limit: 20,
-      totalPages: Math.ceil(content.length / 20)
+    const { page = 1, limit = 20, contentType = 'all', sortBy = 'flaggedAt', sortOrder = 'desc' } = req.query;
+    
+    const result = await FlaggedContentService.getFlaggedContent({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      contentType,
+      sortBy,
+      sortOrder
     });
+
+    res.json(result);
   } catch (error) {
+    console.error('Error fetching flagged content:', error);
     res.status(500).json({
       content: [],
       total: 0,
-      page: 1,
-      limit: 20,
-      totalPages: 0
+      page: parseInt(req.query.page) || 1,
+      limit: parseInt(req.query.limit) || 20,
+      totalPages: 0,
+      error: 'Failed to fetch flagged content'
     });
   }
 });
 
-// Approve flagged content (clear reports and mark as reviewed)
+// Approve flagged content using FlaggedContentService
 router.post('/content/:type/:id/approve', [
   body('moderationReason').optional().trim()
 ], async (req, res) => {
@@ -520,69 +488,25 @@ router.post('/content/:type/:id/approve', [
     const { moderationReason } = req.body;
     const adminUserId = req.user.userId;
 
-    let Model;
-    switch (type) {
-      case 'notice':
-        Model = Notice;
-        break;
-      case 'report':
-        Model = Report;
-        break;
-      case 'message':
-        Model = Message;
-        break;
-      default:
-        return res.status(400).json({ message: 'Invalid content type' });
-    }
-
-    const content = await Model.findById(id);
-    if (!content) {
-      return res.status(404).json({ message: 'Content not found' });
-    }
-
-    // Clear all reports and flagged status
-    content.reports = [];
-    content.isFlagged = false;
-    content.flaggedAt = null;
-    
-    // Set status to active
-    if (type === 'message') {
-      content.moderationStatus = 'active';
-    } else if (type === 'report') {
-      content.reportStatus = 'active';
-    } else {
-      content.status = 'active';
-    }
-    
-    // Add moderation metadata
-    content.moderationReason = moderationReason || 'Content approved by administrator';
-    content.moderatedBy = adminUserId;
-    content.moderatedAt = new Date();
-    
-    await content.save();
-
-    // Log the action to audit log
-    await AuditService.logAction({
+    await FlaggedContentService.approveContent({
+      contentType: type,
+      contentId: id,
       adminId: adminUserId,
-      action: 'content_approve',
-      targetType: type,
-      targetId: id,
-      details: {
-        reason: moderationReason || 'Content approved by administrator',
-        reportsCleared: true
-      },
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent')
+      moderationReason: moderationReason || 'Content approved by administrator'
     });
 
     res.json({ message: 'Content approved successfully' });
   } catch (error) {
     console.error('Error approving content:', error);
-    res.status(500).json({ message: 'Server error' });
+    const statusCode = error.message.includes('not found') ? 404 : 
+                      error.message.includes('not flagged') ? 400 : 500;
+    res.status(statusCode).json({ 
+      message: error.message || 'Server error' 
+    });
   }
 });
 
-// Archive flagged content
+// Archive flagged content using FlaggedContentService
 router.post('/content/:type/:id/archive', [
   body('moderationReason').notEmpty().trim().withMessage('Moderation reason is required for archiving')
 ], async (req, res) => {
@@ -596,67 +520,25 @@ router.post('/content/:type/:id/archive', [
     const { moderationReason } = req.body;
     const adminUserId = req.user.userId;
 
-    let Model;
-    switch (type) {
-      case 'notice':
-        Model = Notice;
-        break;
-      case 'report':
-        Model = Report;
-        break;
-      case 'message':
-        Model = Message;
-        break;
-      default:
-        return res.status(400).json({ message: 'Invalid content type' });
-    }
-
-    const content = await Model.findById(id);
-    if (!content) {
-      return res.status(404).json({ message: 'Content not found' });
-    }
-
-    const oldStatus = content.status || content.reportStatus || content.moderationStatus || 'active';
-    
-    // Set status to archived
-    if (type === 'message') {
-      content.moderationStatus = 'archived';
-    } else if (type === 'report') {
-      content.reportStatus = 'archived';
-    } else {
-      content.status = 'archived';
-    }
-    
-    // Add moderation metadata
-    content.moderationReason = moderationReason;
-    content.moderatedBy = adminUserId;
-    content.moderatedAt = new Date();
-    
-    await content.save();
-
-    // Log the action to audit log
-    await AuditService.logAction({
+    await FlaggedContentService.archiveContent({
+      contentType: type,
+      contentId: id,
       adminId: adminUserId,
-      action: 'content_moderate',
-      targetType: type,
-      targetId: id,
-      details: {
-        oldStatus,
-        newStatus: 'archived',
-        reason: moderationReason
-      },
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent')
+      moderationReason
     });
 
     res.json({ message: 'Content archived successfully' });
   } catch (error) {
     console.error('Error archiving content:', error);
-    res.status(500).json({ message: 'Server error' });
+    const statusCode = error.message.includes('not found') ? 404 : 
+                      error.message.includes('required') ? 400 : 500;
+    res.status(statusCode).json({ 
+      message: error.message || 'Server error' 
+    });
   }
 });
 
-// Remove flagged content
+// Remove flagged content using FlaggedContentService
 router.post('/content/:type/:id/remove', [
   body('moderationReason').notEmpty().trim().withMessage('Moderation reason is required for removal')
 ], async (req, res) => {
@@ -670,63 +552,21 @@ router.post('/content/:type/:id/remove', [
     const { moderationReason } = req.body;
     const adminUserId = req.user.userId;
 
-    let Model;
-    switch (type) {
-      case 'notice':
-        Model = Notice;
-        break;
-      case 'report':
-        Model = Report;
-        break;
-      case 'message':
-        Model = Message;
-        break;
-      default:
-        return res.status(400).json({ message: 'Invalid content type' });
-    }
-
-    const content = await Model.findById(id);
-    if (!content) {
-      return res.status(404).json({ message: 'Content not found' });
-    }
-
-    const oldStatus = content.status || content.reportStatus || content.moderationStatus || 'active';
-    
-    // Set status to removed
-    if (type === 'message') {
-      content.moderationStatus = 'removed';
-    } else if (type === 'report') {
-      content.reportStatus = 'removed';
-    } else {
-      content.status = 'removed';
-    }
-    
-    // Add moderation metadata
-    content.moderationReason = moderationReason;
-    content.moderatedBy = adminUserId;
-    content.moderatedAt = new Date();
-    
-    await content.save();
-
-    // Log the action to audit log
-    await AuditService.logAction({
+    await FlaggedContentService.removeContent({
+      contentType: type,
+      contentId: id,
       adminId: adminUserId,
-      action: 'content_moderate',
-      targetType: type,
-      targetId: id,
-      details: {
-        oldStatus,
-        newStatus: 'removed',
-        reason: moderationReason
-      },
-      ipAddress: req.ip,
-      userAgent: req.get('User-Agent')
+      moderationReason
     });
 
     res.json({ message: 'Content removed successfully' });
   } catch (error) {
     console.error('Error removing content:', error);
-    res.status(500).json({ message: 'Server error' });
+    const statusCode = error.message.includes('not found') ? 404 : 
+                      error.message.includes('required') ? 400 : 500;
+    res.status(statusCode).json({ 
+      message: error.message || 'Server error' 
+    });
   }
 });
 
