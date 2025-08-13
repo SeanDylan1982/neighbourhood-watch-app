@@ -433,4 +433,327 @@ router.get('/users/:id', async (req, res) => {
   }
 });
 
+// Get flagged content for content moderation tab
+router.get('/content/flagged', async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Query for flagged notices
+    const flaggedNotices = await Notice.find({ isFlagged: true })
+      .populate('authorId', 'firstName lastName email')
+      .populate('reports.reportedBy', 'firstName lastName email')
+      .sort({ flaggedAt: -1 })
+      .select('title content authorId reports isFlagged flaggedAt createdAt status moderatedBy moderatedAt moderationReason');
+    
+    // Query for flagged reports
+    const flaggedReports = await Report.find({ isFlagged: true })
+      .populate('reporterId', 'firstName lastName email')
+      .populate('reports.reportedBy', 'firstName lastName email')
+      .sort({ flaggedAt: -1 })
+      .select('title description reporterId reports isFlagged flaggedAt createdAt reportStatus moderatedBy moderatedAt moderationReason');
+    
+    // Query for flagged messages
+    const flaggedMessages = await Message.find({ isFlagged: true })
+      .populate('senderId', 'firstName lastName email')
+      .populate('reports.reportedBy', 'firstName lastName email')
+      .sort({ flaggedAt: -1 })
+      .select('content senderId reports isFlagged flaggedAt createdAt moderationStatus moderatedBy moderatedAt moderationReason');
+    
+    // Combine and format all flagged content
+    const allFlaggedContent = [
+      ...flaggedNotices.map(item => ({
+        id: item._id,
+        contentType: 'notice',
+        content: item.content,
+        title: item.title,
+        author: item.authorId,
+        reports: item.reports || [],
+        reportCount: (item.reports || []).length,
+        createdAt: item.createdAt,
+        flaggedAt: item.flaggedAt,
+        status: item.status || 'active',
+        moderatedBy: item.moderatedBy,
+        moderatedAt: item.moderatedAt,
+        moderationReason: item.moderationReason
+      })),
+      ...flaggedReports.map(item => ({
+        id: item._id,
+        contentType: 'report',
+        content: item.description,
+        title: item.title,
+        author: item.reporterId,
+        reports: item.reports || [],
+        reportCount: (item.reports || []).length,
+        createdAt: item.createdAt,
+        flaggedAt: item.flaggedAt,
+        status: item.reportStatus || 'active',
+        moderatedBy: item.moderatedBy,
+        moderatedAt: item.moderatedAt,
+        moderationReason: item.moderationReason
+      })),
+      ...flaggedMessages.map(item => ({
+        id: item._id,
+        contentType: 'message',
+        content: item.content,
+        title: `Message from ${item.senderId?.firstName || 'Unknown'}`,
+        author: item.senderId,
+        reports: item.reports || [],
+        reportCount: (item.reports || []).length,
+        createdAt: item.createdAt,
+        flaggedAt: item.flaggedAt,
+        status: item.moderationStatus || 'active',
+        moderatedBy: item.moderatedBy,
+        moderatedAt: item.moderatedAt,
+        moderationReason: item.moderationReason
+      }))
+    ];
+    
+    // Sort by flagged date (most recent first)
+    allFlaggedContent.sort((a, b) => new Date(b.flaggedAt) - new Date(a.flaggedAt));
+    
+    // Apply pagination
+    const total = allFlaggedContent.length;
+    const paginatedContent = allFlaggedContent.slice(skip, skip + parseInt(limit));
+    const totalPages = Math.ceil(total / parseInt(limit));
+    
+    res.json({
+      content: paginatedContent,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages
+    });
+  } catch (error) {
+    console.error('Error fetching flagged content:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Approve flagged content (clear reports and mark as reviewed)
+router.post('/content/:type/:id/approve', [
+  body('moderationReason').optional().trim()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { type, id } = req.params;
+    const { moderationReason } = req.body;
+    const adminUserId = req.user.userId;
+
+    let Model;
+    switch (type) {
+      case 'notice':
+        Model = Notice;
+        break;
+      case 'report':
+        Model = Report;
+        break;
+      case 'message':
+        Model = Message;
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid content type' });
+    }
+
+    const content = await Model.findById(id);
+    if (!content) {
+      return res.status(404).json({ message: 'Content not found' });
+    }
+
+    // Clear all reports and flagged status
+    content.reports = [];
+    content.isFlagged = false;
+    content.flaggedAt = null;
+    
+    // Set status to active
+    if (type === 'message') {
+      content.moderationStatus = 'active';
+    } else if (type === 'report') {
+      content.reportStatus = 'active';
+    } else {
+      content.status = 'active';
+    }
+    
+    // Add moderation metadata
+    content.moderationReason = moderationReason || 'Content approved by administrator';
+    content.moderatedBy = adminUserId;
+    content.moderatedAt = new Date();
+    
+    await content.save();
+
+    // Log the action to audit log
+    await AuditService.logAction({
+      adminId: adminUserId,
+      action: 'content_approve',
+      targetType: type,
+      targetId: id,
+      details: {
+        reason: moderationReason || 'Content approved by administrator',
+        reportsCleared: true
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({ message: 'Content approved successfully' });
+  } catch (error) {
+    console.error('Error approving content:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Archive flagged content
+router.post('/content/:type/:id/archive', [
+  body('moderationReason').notEmpty().trim().withMessage('Moderation reason is required for archiving')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { type, id } = req.params;
+    const { moderationReason } = req.body;
+    const adminUserId = req.user.userId;
+
+    let Model;
+    switch (type) {
+      case 'notice':
+        Model = Notice;
+        break;
+      case 'report':
+        Model = Report;
+        break;
+      case 'message':
+        Model = Message;
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid content type' });
+    }
+
+    const content = await Model.findById(id);
+    if (!content) {
+      return res.status(404).json({ message: 'Content not found' });
+    }
+
+    const oldStatus = content.status || content.reportStatus || content.moderationStatus || 'active';
+    
+    // Set status to archived
+    if (type === 'message') {
+      content.moderationStatus = 'archived';
+    } else if (type === 'report') {
+      content.reportStatus = 'archived';
+    } else {
+      content.status = 'archived';
+    }
+    
+    // Add moderation metadata
+    content.moderationReason = moderationReason;
+    content.moderatedBy = adminUserId;
+    content.moderatedAt = new Date();
+    
+    await content.save();
+
+    // Log the action to audit log
+    await AuditService.logAction({
+      adminId: adminUserId,
+      action: 'content_moderate',
+      targetType: type,
+      targetId: id,
+      details: {
+        oldStatus,
+        newStatus: 'archived',
+        reason: moderationReason
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({ message: 'Content archived successfully' });
+  } catch (error) {
+    console.error('Error archiving content:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Remove flagged content
+router.post('/content/:type/:id/remove', [
+  body('moderationReason').notEmpty().trim().withMessage('Moderation reason is required for removal')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { type, id } = req.params;
+    const { moderationReason } = req.body;
+    const adminUserId = req.user.userId;
+
+    let Model;
+    switch (type) {
+      case 'notice':
+        Model = Notice;
+        break;
+      case 'report':
+        Model = Report;
+        break;
+      case 'message':
+        Model = Message;
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid content type' });
+    }
+
+    const content = await Model.findById(id);
+    if (!content) {
+      return res.status(404).json({ message: 'Content not found' });
+    }
+
+    const oldStatus = content.status || content.reportStatus || content.moderationStatus || 'active';
+    
+    // Set status to removed
+    if (type === 'message') {
+      content.moderationStatus = 'removed';
+    } else if (type === 'report') {
+      content.reportStatus = 'removed';
+    } else {
+      content.status = 'removed';
+    }
+    
+    // Add moderation metadata
+    content.moderationReason = moderationReason;
+    content.moderatedBy = adminUserId;
+    content.moderatedAt = new Date();
+    
+    await content.save();
+
+    // Log the action to audit log
+    await AuditService.logAction({
+      adminId: adminUserId,
+      action: 'content_moderate',
+      targetType: type,
+      targetId: id,
+      details: {
+        oldStatus,
+        newStatus: 'removed',
+        reason: moderationReason
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({ message: 'Content removed successfully' });
+  } catch (error) {
+    console.error('Error removing content:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

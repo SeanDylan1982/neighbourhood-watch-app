@@ -61,4 +61,4 @@ This feature enhances the existing admin dashboard content moderation functional
 1. WHEN new content is reported THEN the system SHALL update the flagged content count in real-time
 2. WHEN new content is reported THEN the system SHALL refresh the content moderation list automatically
 3. WHEN an admin takes a moderation action THEN the system SHALL update the display immediately
-4. WHEN content is approved or removed THEN the system SHALL remove it from the flagged content list
+4. WHEN content is approved or removed THEN the system SHALL remove it from the flagged con
