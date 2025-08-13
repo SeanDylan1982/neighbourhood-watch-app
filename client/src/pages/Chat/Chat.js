@@ -33,9 +33,12 @@ import {
   AttachFile as AttachIcon,
 } from "@mui/icons-material";
 import useApi from "../../hooks/useApi";
+import useChatErrorHandler from "../../hooks/useChatErrorHandler";
+import useChatCache from "../../hooks/useChatCache";
 import { useSocket } from "../../contexts/SocketContext";
 import { useAuth } from "../../contexts/AuthContext";
 import ErrorDisplay from "../../components/Common/ErrorDisplay";
+import ChatErrorBoundary from "../../components/Chat/ChatErrorBoundary";
 import { ChatSkeleton } from "../../components/Common/LoadingSkeleton";
 import ChatWelcomeMessage from "../../components/Welcome/ChatWelcomeMessage";
 import EmptyState from "../../components/Common/EmptyState";
@@ -46,11 +49,50 @@ import GroupMessageThread from "../../components/GroupChat/GroupMessageThread";
 const Chat = () => {
   const { user } = useAuth();
   const { loading, error, clearError, get, post } = useApi();
+  const { handleChatLoad, handleChatError } = useChatErrorHandler();
+  const { 
+    isPreloading, 
+    preloadChatData, 
+    getCachedChatGroups, 
+    getCachedMessages, 
+    addMessageToCache,
+    updateCachedMessages,
+    hasCachedMessages,
+    cacheStats,
+    getDebugInfo,
+    clearCache
+  } = useChatCache();
+
+  // Expose debugging functions to window for browser console testing
+  useEffect(() => {
+    window.chatDebug = {
+      preloadChatData,
+      getCachedChatGroups,
+      getCachedMessages,
+      clearCache,
+      cacheStats,
+      getDebugInfo,
+      hasCachedMessages,
+      // Additional debug info
+      currentChatGroups: chatGroups,
+      currentMessages: messages,
+      selectedChat,
+      isPreloading
+    };
+    
+    console.log('🔧 Chat debugging functions available at window.chatDebug');
+    console.log('Available functions:', Object.keys(window.chatDebug));
+    
+    return () => {
+      delete window.chatDebug;
+    };
+  }, [preloadChatData, getCachedChatGroups, getCachedMessages, clearCache, cacheStats, getDebugInfo, hasCachedMessages, chatGroups, messages, selectedChat, isPreloading]);
   const { socket, joinGroup } = useSocket();
   const [selectedChat, setSelectedChat] = useState(null);
   const [message, setMessage] = useState("");
   const [chatGroups, setChatGroups] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [failedMessages, setFailedMessages] = useState([]);
@@ -77,11 +119,29 @@ const Chat = () => {
     });
   }, []);
 
-  const fetchChatGroups = useCallback(async () => {
+  const fetchChatGroups = useCallback(async (useCache = true) => {
     try {
-      clearError();
-      const data = await get("/api/chat/groups");
-      const groups = Array.isArray(data) ? data : [];
+      let groups = [];
+      
+      // Try to get from cache first
+      if (useCache) {
+        const cachedGroups = getCachedChatGroups();
+        if (cachedGroups && cachedGroups.length > 0) {
+          console.log('📖 Using cached chat groups');
+          groups = cachedGroups;
+        }
+      }
+      
+      // If no cached data or cache disabled, fetch from API
+      if (groups.length === 0) {
+        console.log('📥 Fetching chat groups from API');
+        const data = await handleChatLoad(
+          () => get("/api/chat/groups"),
+          "loading chat groups"
+        );
+        groups = Array.isArray(data) ? data : [];
+      }
+      
       const formattedGroups = groups.map((group) => ({
         id: group.id || group._id,
         name: group.name,
@@ -92,23 +152,28 @@ const Chat = () => {
         unreadCount: 0, // Will be calculated based on user's read status
         members: group.memberCount || group.members?.length || 0,
       }));
+      
       setChatGroups(formattedGroups);
       setDataLoaded(true);
     } catch (error) {
-      console.error("Error fetching chat groups:", error);
+      // Error already handled by handleChatLoad
       setChatGroups([]);
+      setDataLoaded(true); // Still mark as loaded to prevent infinite loading
     }
-  }, [get, clearError, formatTime]);
+  }, [get, handleChatLoad, formatTime, getCachedChatGroups, preloadChatData]);
 
   const fetchAvailableUsers = useCallback(async () => {
     try {
-      const data = await get("/api/users/neighbours");
+      const data = await handleChatLoad(
+        () => get("/api/users/neighbours"),
+        "loading available users"
+      );
       setAvailableUsers(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching available users:", error);
+      // Error already handled by handleChatLoad
       setAvailableUsers([]);
     }
-  }, [get]);
+  }, [get, handleChatLoad]);
 
   // Fetch group members with caching - moved here to be available for socket effects
   const fetchGroupMembers = useCallback(
@@ -244,10 +309,48 @@ const Chat = () => {
     [get, memberCache, user]
   );
 
-  // Fetch chat groups from API
+  // Initialize chat data when component mounts
   useEffect(() => {
-    fetchChatGroups();
-  }, [fetchChatGroups]); // Remove fetchChatGroups dependency to prevent infinite loop
+    const initializeChatData = async () => {
+      console.log('🚀 Initializing chat data...');
+      
+      // First, try to load from cache
+      const cachedGroups = getCachedChatGroups();
+      if (cachedGroups && cachedGroups.length > 0) {
+        console.log('📖 Loading chat groups from cache');
+        const formattedGroups = cachedGroups.map((group) => ({
+          id: group.id || group._id,
+          name: group.name,
+          lastMessage: group.lastMessage?.content || "No messages yet",
+          lastMessageTime: group.lastMessage?.timestamp
+            ? formatTime(group.lastMessage.timestamp)
+            : "",
+          unreadCount: 0,
+          members: group.memberCount || group.members?.length || 0,
+        }));
+        setChatGroups(formattedGroups);
+        setDataLoaded(true);
+      }
+      
+      // Then preload all data in background
+      console.log('🔄 Starting background data preload...');
+      const preloadResult = await preloadChatData({ 
+        showProgress: false, 
+        showToasts: false 
+      });
+      
+      if (preloadResult.success) {
+        console.log('✅ Background preload successful');
+        // Refresh chat groups with latest data
+        fetchChatGroups(true); // Use cache since we just updated it
+      } else {
+        console.log('⚠️ Background preload failed, using API fallback');
+        fetchChatGroups(false); // Don't use cache, fetch from API
+      }
+    };
+
+    initializeChatData();
+  }, [fetchChatGroups, formatTime, getCachedChatGroups, preloadChatData]); // Only run once on mount
 
   // Set up socket event listeners for real-time updates
   useEffect(() => {
@@ -383,58 +486,49 @@ const Chat = () => {
   }, [socket, selectedChat, formatTime]);
 
   const fetchMessages = useCallback(
-    async (chatId) => {
+    async (chatId, useCache = true) => {
+      if (!chatId) return;
+      
       try {
         console.log("Fetching messages for chatId:", chatId);
-        const data = await get(`/api/chat/groups/${chatId}/messages`);
+        setMessagesLoading(true);
+        
+        let messages = [];
+        
+        // Try cache first if enabled
+        if (useCache && hasCachedMessages(chatId)) {
+          console.log("📖 Using cached messages for chat:", chatId);
+          const cachedMessages = getCachedMessages(chatId);
+          if (cachedMessages && cachedMessages.length > 0) {
+            messages = cachedMessages;
+          }
+        }
+        
+        // If no cached messages or cache disabled, fetch from API
+        if (messages.length === 0) {
+          console.log("📥 Fetching messages from API for chat:", chatId);
+          const data = await handleChatLoad(
+            () => get(`/api/chat/groups/${chatId}/messages`),
+            `loading messages for chat ${chatId}`
+          );
 
-        console.log("Messages API response:", data);
-
-        if (!data) {
-          console.log("No message data received, using mock messages for demo");
-          // Add mock messages for demonstration
-          const mockMessages = [
-            {
-              _id: `${chatId}-msg-1`,
-              content: "Welcome to the group chat!",
-              senderId: "system",
-              senderName: "System",
-              createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-            },
-            {
-              _id: `${chatId}-msg-2`,
-              content: "Hello everyone! 👋",
-              senderId: `${chatId}-member-1`,
-              senderName: "John Doe",
-              createdAt: new Date(Date.now() - 1800000).toISOString(), // 30 minutes ago
-            },
-            {
-              _id: `${chatId}-msg-3`,
-              content: "Great to be here!",
-              senderId: `${chatId}-member-2`,
-              senderName: "Jane Smith",
-              createdAt: new Date(Date.now() - 900000).toISOString(), // 15 minutes ago
-            },
-          ];
-
-          const formattedMockMessages = mockMessages.map((msg) => ({
-            id: msg._id,
-            sender: msg.senderName,
-            message: msg.content,
-            content: msg.content,
-            time: formatTime(msg.createdAt),
-            createdAt: msg.createdAt,
-            isOwn: false,
-            senderId: msg.senderId,
-            senderName: msg.senderName,
-          }));
-
-          setMessages(formattedMockMessages);
-          return;
+          messages = Array.isArray(data) ? data : [];
+          
+          // Store in cache for future use
+          if (messages.length > 0) {
+            updateCachedMessages(chatId, messages);
+          }
         }
 
-        const messages = Array.isArray(data) ? data : [];
         console.log("Processing messages:", messages.length);
+
+        // If no messages, show empty state
+        if (messages.length === 0) {
+          console.log("No messages found for chat:", chatId);
+          setMessages([]);
+          setMessagesLoading(false);
+          return;
+        }
 
         const formattedMessages = messages.map((msg) => {
           const isOwn =
@@ -457,9 +551,9 @@ const Chat = () => {
             id: msg.id || msg._id,
             sender: senderName,
             message: msg.content,
-            content: msg.content, // Add content field for GroupMessageThread compatibility
+            content: msg.content,
             time: formatTime(msg.createdAt),
-            createdAt: msg.createdAt, // Add createdAt for GroupMessageThread compatibility
+            createdAt: msg.createdAt,
             isOwn: isOwn,
             senderId: msg.senderId,
             senderName: senderName,
@@ -468,40 +562,15 @@ const Chat = () => {
 
         console.log("Formatted messages:", formattedMessages);
         setMessages(formattedMessages);
+        setMessagesLoading(false);
       } catch (error) {
-        console.error("Error fetching messages:", error);
-        console.log("Using mock messages due to API error");
-
-        // Fallback to mock messages
-        const mockMessages = [
-          {
-            id: `${chatId}-msg-1`,
-            sender: "System",
-            message: "Welcome to the group chat!",
-            content: "Welcome to the group chat!",
-            time: formatTime(new Date(Date.now() - 3600000).toISOString()),
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-            isOwn: false,
-            senderId: "system",
-            senderName: "System",
-          },
-          {
-            id: `${chatId}-msg-2`,
-            sender: "John Doe",
-            message: "Hello everyone! 👋",
-            content: "Hello everyone! 👋",
-            time: formatTime(new Date(Date.now() - 1800000).toISOString()),
-            createdAt: new Date(Date.now() - 1800000).toISOString(),
-            isOwn: false,
-            senderId: `${chatId}-member-1`,
-            senderName: "John Doe",
-          },
-        ];
-
-        setMessages(mockMessages);
+        // Error already handled by handleChatLoad
+        console.log("Failed to load messages, showing empty state");
+        setMessages([]);
+        setMessagesLoading(false);
       }
     },
-    [formatTime, get, user]
+    [formatTime, get, user, handleChatLoad, hasCachedMessages, getCachedMessages, updateCachedMessages]
   );
 
   // Fetch messages for selected chat
@@ -509,10 +578,18 @@ const Chat = () => {
     if (selectedChat) {
       console.log("Selected chat changed to:", selectedChat);
 
-      // Clear current member data when switching groups
+      // Clear current data when switching groups to prevent showing old data
+      setMessages([]); // Clear messages immediately
       setGroupMembers([]);
       setLoadingMembers(true);
+      
+      // Clear any typing indicators
+      setTypingUsers({});
+      
+      // Clear any reply state
+      setReplyingTo(null);
 
+      // Fetch new data
       fetchMessages(selectedChat);
 
       // Fetch group members immediately
@@ -520,6 +597,12 @@ const Chat = () => {
       fetchGroupMembers(selectedChat);
 
       joinGroup(selectedChat);
+    } else {
+      // If no chat is selected, clear all data
+      setMessages([]);
+      setGroupMembers([]);
+      setTypingUsers({});
+      setReplyingTo(null);
     }
   }, [selectedChat, fetchMessages, fetchGroupMembers, joinGroup]);
 
@@ -924,11 +1007,11 @@ const Chat = () => {
       </Box>
 
       {error && (
-        <ErrorDisplay
+        <ChatErrorBoundary
           error={error}
           onRetry={fetchChatGroups}
           onDismiss={clearError}
-          showDetails={true}
+          context="chat groups"
         />
       )}
 

@@ -66,21 +66,42 @@ router.get('/groups', async (req, res) => {
   }
 });
 
+// Enhanced error logging utility
+const logError = (error, context) => {
+  console.error('=== GROUP MESSAGES ERROR ===');
+  console.error('Context:', JSON.stringify(context, null, 2));
+  console.error('Error:', error.message);
+  console.error('Stack:', error.stack);
+  console.error('Time:', new Date().toISOString());
+  console.error('=============================');
+};
+
 // Get messages for a group
 router.get('/groups/:groupId/messages', [
   query('limit').optional().isInt({ min: 1, max: 100 }),
   query('offset').optional().isInt({ min: 0 }),
   query('before').optional().isISO8601()
 ], async (req, res) => {
+  const requestContext = {
+    groupId: req.params.groupId,
+    userId: req.user?.userId,
+    query: req.query,
+    method: 'GET',
+    endpoint: '/groups/:groupId/messages'
+  };
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      logError(new Error('Validation failed'), { ...requestContext, validationErrors: errors.array() });
       return res.status(400).json({ errors: errors.array() });
     }
 
     const groupId = req.params.groupId;
     const { limit = 50, offset = 0, before } = req.query;
     const userId = req.user.userId;
+
+    console.log('Fetching messages for group:', groupId, 'user:', userId);
 
     // Verify user is member of the group
     const group = await ChatGroup.findOne({
@@ -90,8 +111,12 @@ router.get('/groups/:groupId/messages', [
     });
 
     if (!group) {
+      const error = new Error('Not a member of this group or group not found');
+      logError(error, requestContext);
       return res.status(403).json({ message: 'Not a member of this group or group not found' });
     }
+
+    console.log('User verified as group member. Group:', group.name);
 
     // Build query
     const query = {
@@ -104,12 +129,16 @@ router.get('/groups/:groupId/messages', [
       query.createdAt = { $lt: new Date(before) };
     }
 
+    console.log('Message query:', JSON.stringify(query, null, 2));
+
     const messages = await Message.find(query)
       .populate('senderId', 'firstName lastName profileImageUrl')
-      .populate('replyToId', 'content senderId')
+      .populate('replyTo.messageId', 'content senderId') // Fixed: use replyTo.messageId instead of replyToId
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip(parseInt(offset));
+
+    console.log('Messages fetched successfully:', messages.length);
 
     // Format messages
     const formattedMessages = messages.map(msg => ({

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node railway-debug.js",
+    "start": "node index.js",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
     "configure-rate-limits": "node scripts/configure-rate-limits.js",
