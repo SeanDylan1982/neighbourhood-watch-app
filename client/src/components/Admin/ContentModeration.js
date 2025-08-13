@@ -360,7 +360,7 @@ const ContentModeration = () => {
             </Button>
           }
         >
-          {error}
+          {typeof error === 'string' ? error : error.message || 'An error occurred while loading content'}
         </Alert>
       )}
 

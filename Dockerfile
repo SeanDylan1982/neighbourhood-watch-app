@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install client deps
 COPY client/package*.json ./client/
-RUN cd client && npm install
+RUN cd client && npm install --legacy-peer-deps
 
 # Copy client code
 COPY client ./client
@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Install server deps
 COPY server/package*.json ./server/
-RUN cd server && npm install
+RUN cd server && npm install --legacy-peer-deps
 
 # Copy server code
 COPY server ./server
