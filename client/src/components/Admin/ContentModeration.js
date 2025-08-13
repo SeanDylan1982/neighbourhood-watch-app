@@ -36,6 +36,7 @@ import {
 import useApi from '../../hooks/useApi';
 import { useToast } from '../Common/Toast';
 
+
 const ContentModeration = () => {
   const { loading, error, clearError, getWithRetry, postWithRetry } = useApi();
   const { showToast } = useToast();
@@ -50,46 +51,29 @@ const ContentModeration = () => {
 
   const fetchFlaggedContent = useCallback(async () => {
     try {
-      clearError();
+      // Use the SAME endpoint that works for the dashboard
+      const stats = await getWithRetry('/api/admin/stats');
       
-      const params = {
-        page,
-        limit
-      };
-      
-      const response = await getWithRetry('/api/admin/content/flagged', {
-        params
-      });
-      
-      if (response) {
-        setFlaggedContent(response.content || []);
-        setTotalPages(response.totalPages || 1);
+      if (stats && stats.flaggedContent > 0) {
+        // Get the actual flagged content
+        const response = await getWithRetry('/api/admin/content/flagged');
+        
+        if (response && response.content) {
+          setFlaggedContent(response.content);
+          setTotalPages(response.totalPages || 1);
+        }
       } else {
         setFlaggedContent([]);
         setTotalPages(1);
       }
     } catch (error) {
-      console.error('Error fetching flagged content:', error);
       setFlaggedContent([]);
       setTotalPages(1);
-      
-      let errorMessage = 'Failed to load flagged content';
-      
-      if (error.response?.status === 403) {
-        errorMessage = 'You do not have permission to access content moderation. Admin privileges required.';
-      } else if (error.response?.status === 401) {
-        errorMessage = 'Authentication required. Please log in again.';
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      showToast(errorMessage, 'error');
     }
-  }, [clearError, page, limit, getWithRetry, showToast]);
+  }, [getWithRetry]);
 
   useEffect(() => {
+    console.log('ContentModeration component mounted, fetching flagged content...');
     fetchFlaggedContent();
   }, [fetchFlaggedContent]);
   
@@ -335,6 +319,8 @@ const ContentModeration = () => {
 
   return (
     <Box>
+
+      
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6">
           Content Moderation - Flagged Content
