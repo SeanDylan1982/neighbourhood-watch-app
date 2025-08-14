@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -9,8 +8,7 @@ import {
   useTheme,
   useMediaQuery,
   Chip,
-  Stack,
-  CircularProgress
+  Stack
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useChat } from '../../hooks/useChat';
@@ -18,10 +16,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { ChatSkeleton } from '../../components/Common/LoadingSkeleton';
 import ChatWelcomeMessage from '../../components/Welcome/ChatWelcomeMessage';
 import useApi from '../../hooks/useApi';
-
-// Lazy load heavy components for better performance
-const ChatList = lazy(() => import('../../components/Chat/ChatList/ChatList'));
-const ChatWindow = lazy(() => import('../../components/Chat/ChatWindow/ChatWindow'));
+import ChatList from '../../components/Chat/ChatList/ChatList';
+import ChatListErrorBoundary from '../../components/Chat/ChatList/ChatListErrorBoundary';
+import ChatWindow from '../../components/Chat/ChatWindow/ChatWindow';
+import ResponsiveChatContainer from '../../components/Chat/ChatWindow/ResponsiveChatContainer';
 
 const PrivateChatTab = () => {
   const theme = useTheme();
@@ -184,139 +182,115 @@ const PrivateChatTab = () => {
     );
   }
 
-  return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Grid container sx={{ height: '100%', flex: 1 }}>
+  // Chat List Component
+  const chatListComponent = (
+    <Card sx={{ height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h6" gutterBottom>
+          Private Messages
+        </Typography>
+
+        {/* Welcome message for new users */}
+        {privateChats.length === 0 && (
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChatWelcomeMessage
+              hasGroupChats={chats.some(chat => chat.type === 'group')}
+              hasPrivateChats={false}
+            />
+          </Box>
+        )}
+
         {/* Chat List */}
-        <Grid
-          item
-          xs={12}
-          md={4}
-          sx={{
-            display: { xs: localSelectedChatId ? 'none' : 'block', md: 'block' },
-            height: '100%'
-          }}
-        >
-          <Card sx={{ height: '100%', borderRadius: 0 }}>
-            <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="h6" gutterBottom>
-                Private Messages
-              </Typography>
-
-              {/* Welcome message for new users */}
-              {privateChats.length === 0 && (
-                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChatWelcomeMessage
-                    hasGroupChats={chats.some(chat => chat.type === 'group')}
-                    hasPrivateChats={false}
-                  />
-                </Box>
-              )}
-
-              {/* Chat List */}
-              {privateChats.length > 0 && (
-                <Box sx={{ flex: 1, overflow: 'hidden' }}>
-                  {/* Online Friends Status */}
-                  {enhancedPrivateChats.some(chat => chat.isOnline) && (
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                        Online Now
-                      </Typography>
-                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-                        {enhancedPrivateChats
-                          .filter(chat => chat.isOnline)
-                          .slice(0, 5) // Show max 5 online friends
-                          .map(chat => (
-                            <Chip
-                              key={chat.id}
-                              label={chat.participantName}
-                              size="small"
-                              color="success"
-                              variant="outlined"
-                              onClick={() => handleChatSelect(chat.id)}
-                              sx={{ cursor: 'pointer' }}
-                            />
-                          ))}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  <Suspense fallback={
-                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                      <CircularProgress />
-                    </Box>
-                  }>
-                    <ChatList
-                      chatType="private"
-                      chats={enhancedPrivateChats}
-                      selectedChatId={localSelectedChatId}
-                      onChatSelect={handleChatSelect}
-                      onChatAction={handleChatAction}
-                    />
-                  </Suspense>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Chat Window */}
-        <Grid
-          item
-          xs={12}
-          md={8}
-          sx={{
-            display: { xs: localSelectedChatId ? 'block' : 'none', md: 'block' },
-            height: '100%'
-          }}
-        >
-          <Card sx={{ height: '100%', borderRadius: 0 }}>
-            {localSelectedChatId && selectedChat ? (
-              <Suspense fallback={
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                  <CircularProgress />
-                </Box>
-              }>
-                <ChatWindow
-                  chat={selectedChat}
-                  messages={messages}
-                  onSendMessage={sendMessage}
-                  onBack={isMobile ? handleBack : undefined}
-                />
-              </Suspense>
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  p: 3,
-                  textAlign: 'center'
-                }}
-              >
-                <Alert severity="info" sx={{ width: '100%', maxWidth: 400 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Welcome to Private Messages
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 2 }}>
-                    Start a private conversation with your neighbors and friends.
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="primary" 
-                    sx={{ cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={handleStartNewChat}
-                  >
-                    Browse your contacts to start chatting
-                  </Typography>
-                </Alert>
+        {privateChats.length > 0 && (
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            {/* Online Friends Status */}
+            {enhancedPrivateChats.some(chat => chat.isOnline) && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                  Online Now
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                  {enhancedPrivateChats
+                    .filter(chat => chat.isOnline)
+                    .slice(0, 5) // Show max 5 online friends
+                    .map(chat => (
+                      <Chip
+                        key={chat.id}
+                        label={chat.participantName}
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                        onClick={() => handleChatSelect(chat.id)}
+                        sx={{ cursor: 'pointer' }}
+                      />
+                    ))}
+                </Stack>
               </Box>
             )}
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+
+            <ChatListErrorBoundary>
+              <ChatList
+                chatType="private"
+                chats={enhancedPrivateChats}
+                selectedChatId={localSelectedChatId}
+                onChatSelect={handleChatSelect}
+                onChatAction={handleChatAction}
+              />
+            </ChatListErrorBoundary>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Message Content Component
+  const messageContentComponent = localSelectedChatId && selectedChat ? (
+    <ChatWindow
+      chat={selectedChat}
+      messages={messages}
+      onSendMessage={sendMessage}
+      onBack={isMobile ? handleBack : undefined}
+    />
+  ) : (
+    <Card sx={{ height: '100%', borderRadius: 0 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          p: 3,
+          textAlign: 'center'
+        }}
+      >
+        <Alert severity="info" sx={{ width: '100%', maxWidth: 400 }}>
+          <Typography variant="h6" gutterBottom>
+            Welcome to Private Messages
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Start a private conversation with your neighbors and friends.
+          </Typography>
+          <Typography 
+            variant="body2" 
+            color="primary" 
+            sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+            onClick={handleStartNewChat}
+          >
+            Browse your contacts to start chatting
+          </Typography>
+        </Alert>
+      </Box>
+    </Card>
+  );
+
+  return (
+    <ResponsiveChatContainer
+      chatListComponent={chatListComponent}
+      messageContentComponent={messageContentComponent}
+      selectedChatId={localSelectedChatId}
+      showChatList={true}
+      showMessageContent={true}
+    />
   );
 };
 

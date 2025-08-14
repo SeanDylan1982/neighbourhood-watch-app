@@ -38,6 +38,7 @@ import { ToastContainer } from "./components/Common/Toast";
 import serviceWorkerManager from "./services/ServiceWorkerManager";
 import manifestValidator from "./services/ManifestValidator";
 import productionErrorHandler from "./services/ProductionErrorHandler";
+import { initChunkLoadingFixes } from "./utils/chunkLoadingFix";
 
 const theme = createTheme({
   palette: {
@@ -102,6 +103,9 @@ function App() {
   // Initialize app-level services
   useEffect(() => {
     document.title = BRAND.metadata.title;
+
+    // Initialize chunk loading fixes
+    initChunkLoadingFixes();
 
     // Initialize service worker with error handling
     const initServiceWorker = async () => {
@@ -193,11 +197,11 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <OfflineIndicator />
-        <AuthProvider>
-          <SocketProvider>
-            <ChatProvider>
-              <MessageProvider>
-                <ToastProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <ChatProvider>
+                <MessageProvider>
                   <Router>
                     <ErrorBoundary>
                       <Routes>
@@ -355,11 +359,11 @@ function App() {
                     </ErrorBoundary>
                     <ToastContainer />
                   </Router>
-                </ToastProvider>
-              </MessageProvider>
-            </ChatProvider>
-          </SocketProvider>
-        </AuthProvider>
+                </MessageProvider>
+              </ChatProvider>
+            </SocketProvider>
+          </AuthProvider>
+        </ToastProvider>
 
         {/* Global Cookie Consent Modal */}
         <CookiesModal

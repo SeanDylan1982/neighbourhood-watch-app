@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
+import { useToast } from './ToastContext';
 // Removed circular dependency - selectedChatId and selectedChat will be passed via props or managed differently
 import useApi from '../hooks/useApi';
+import useChatErrorHandler from '../hooks/useChatErrorHandler';
 
 const MessageContext = createContext();
 
@@ -18,10 +20,13 @@ export const MessageProvider = ({ children }) => {
   const { user } = useAuth();
   const { socket } = useSocket();
   
+  const { showToast } = useToast();
+  
   // These will be managed by the unified useChat hook instead
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
-  const { get, post, patch, delete: deleteRequest } = useApi();
+  const { get, post, patch, delete: deleteRequest, getWithRetry, postWithRetry } = useApi();
+  const { handleChatError, retryChatOperation, handleChatLoad, clearError: clearChatError } = useChatErrorHandler();
   
   // Core message state
   const [messages, setMessages] = useState([]);
@@ -38,10 +43,12 @@ export const MessageProvider = ({ children }) => {
   // Loading states
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isRetryingMessages, setIsRetryingMessages] = useState(false);
   
   // Error handling
   const [failedMessages, setFailedMessages] = useState([]);
   const [error, setError] = useState(null);
+  const [lastFailedOperation, setLastFailedOperation] = useState(null);
   
   // Refs for cleanup
   const typingTimeoutRef = useRef(null);
@@ -56,14 +63,16 @@ export const MessageProvider = ({ children }) => {
     });
   }, []);
 
-  // Load messages for a chat
+  // Load messages for a chat with enhanced error handling and retry logic
   const loadMessages = useCallback(async (chatId, options = {}) => {
     if (!chatId) return;
     
     setIsLoadingMessages(true);
     setError(null);
+    clearChatError();
     
-    try {
+    // Store operation for potential retry
+    const operation = async () => {
       const endpoint = selectedChat?.type === 'group' 
         ? `/api/chat/groups/${chatId}/messages`
         : `/api/chat/private/${chatId}/messages`;
@@ -76,102 +85,98 @@ export const MessageProvider = ({ children }) => {
       const queryString = params.toString();
       const url = queryString ? `${endpoint}?${queryString}` : endpoint;
       
-      const data = await get(url);
+      return await getWithRetry(url, {}, 3); // Retry up to 3 times
+    };
+    
+    setLastFailedOperation(() => () => loadMessages(chatId, options));
+    
+    try {
+      const data = await handleChatLoad(operation, `loading messages for chat ${chatId}`);
       
+      // Handle corrected API response format
       if (!data || !Array.isArray(data)) {
-        console.log('No message data received, using mock messages for demo');
-        // Generate mock messages for demonstration
-        const mockMessages = [
-          {
-            _id: `${chatId}-msg-1`,
-            content: selectedChat?.type === 'group' ? 'Welcome to the group chat!' : 'Hello! 👋',
-            senderId: selectedChat?.type === 'group' ? 'system' : (selectedChat?.participantId || 'other-user'),
-            senderName: selectedChat?.type === 'group' ? 'System' : (selectedChat?.participantName || 'Friend'),
-            createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-            type: 'text',
-            status: 'read',
-            reactions: [],
-            attachments: []
-          },
-          {
-            _id: `${chatId}-msg-2`,
-            content: selectedChat?.type === 'group' ? 'Hello everyone! 👋' : 'How are you doing?',
-            senderId: selectedChat?.type === 'group' ? `${chatId}-member-1` : (selectedChat?.participantId || 'other-user'),
-            senderName: selectedChat?.type === 'group' ? 'John Doe' : (selectedChat?.participantName || 'Friend'),
-            createdAt: new Date(Date.now() - 1800000).toISOString(), // 30 minutes ago
-            type: 'text',
-            status: 'read',
-            reactions: [],
-            attachments: []
-          }
-        ];
-        
-        const formattedMockMessages = mockMessages.map(msg => ({
-          id: msg._id,
-          chatId: chatId,
-          chatType: selectedChat?.type || 'group',
-          senderId: msg.senderId,
-          senderName: msg.senderName,
-          content: msg.content,
-          type: msg.type,
-          timestamp: new Date(msg.createdAt),
-          status: msg.status,
-          deliveredTo: [],
-          readBy: [],
-          reactions: msg.reactions || [],
-          replyTo: msg.replyTo || null,
-          attachments: msg.attachments || [],
-          isDeleted: false,
-          deletedFor: [],
-          isReported: false
-        }));
-        
-        setMessages(formattedMockMessages);
+        console.log('No message data received or invalid format, using empty array');
+        setMessages([]);
         return;
       }
       
-      // Format messages from API
-      const formattedMessages = data.map(msg => ({
-        id: msg.id || msg._id,
-        chatId: chatId,
-        chatType: selectedChat?.type || 'group',
-        senderId: msg.senderId,
-        senderName: msg.senderName,
-        content: msg.content,
-        type: msg.type || 'text',
-        timestamp: new Date(msg.createdAt),
-        editedAt: msg.editedAt ? new Date(msg.editedAt) : null,
-        status: msg.status || 'sent',
-        deliveredTo: msg.deliveredTo || [],
-        readBy: msg.readBy || [],
-        reactions: msg.reactions || [],
-        replyTo: msg.replyTo || null,
-        attachments: msg.attachments || [],
-        isDeleted: msg.isDeleted || false,
-        deletedFor: msg.deletedFor || [],
-        isReported: msg.isReported || false,
-        moderationStatus: msg.moderationStatus
-      }));
+      // Format messages from API with enhanced field mapping
+      const formattedMessages = data.map(msg => {
+        // Handle both legacy and new field formats
+        const messageId = msg.id || msg._id;
+        const createdAt = msg.createdAt || msg.timestamp;
+        const attachments = msg.attachments || msg.media || [];
+        
+        return {
+          id: messageId,
+          chatId: chatId,
+          chatType: selectedChat?.type || 'group',
+          senderId: msg.senderId,
+          senderName: msg.senderName || 'Unknown User',
+          senderAvatar: msg.senderAvatar,
+          content: msg.content,
+          type: msg.type || msg.messageType || 'text',
+          timestamp: new Date(createdAt),
+          editedAt: msg.editedAt ? new Date(msg.editedAt) : null,
+          status: msg.status || 'sent',
+          deliveredTo: msg.deliveredTo || [],
+          readBy: msg.readBy || [],
+          reactions: msg.reactions || [],
+          replyTo: msg.replyTo ? {
+            id: msg.replyTo.id || msg.replyTo.messageId,
+            content: msg.replyTo.content,
+            senderId: msg.replyTo.senderId,
+            senderName: msg.replyTo.senderName
+          } : null,
+          attachments: attachments,
+          isDeleted: msg.isDeleted || false,
+          deletedFor: msg.deletedFor || [],
+          isReported: msg.isReported || false,
+          isEdited: msg.isEdited || false,
+          isForwarded: msg.isForwarded || false,
+          forwardedFrom: msg.forwardedFrom,
+          moderationStatus: msg.moderationStatus
+        };
+      });
       
       setMessages(formattedMessages);
+      setLastFailedOperation(null); // Clear failed operation on success
       
     } catch (err) {
       console.error('Error loading messages:', err);
-      setError(err.message || 'Failed to load messages');
+      setError({
+        message: err.message || 'Failed to load messages',
+        type: 'load_messages',
+        chatId: chatId,
+        canRetry: true,
+        timestamp: new Date()
+      });
+      
+      // Show user-friendly error message
+      showToast({
+        message: 'Failed to load messages. You can try refreshing.',
+        type: 'error',
+        duration: 5000,
+        action: {
+          label: 'Retry',
+          onClick: () => loadMessages(chatId, options)
+        }
+      });
       
       // Fallback to empty messages array
       setMessages([]);
     } finally {
       setIsLoadingMessages(false);
     }
-  }, [get, selectedChat]);
+  }, [getWithRetry, selectedChat, handleChatLoad, clearChatError, showToast]);
 
-  // Send a message
+  // Send a message with enhanced error handling and retry logic
   const sendMessage = useCallback(async (content, type = 'text', messageAttachments = []) => {
     if (!selectedChatId || !content.trim() || isSendingMessage) return;
     
     setIsSendingMessage(true);
     setError(null);
+    clearChatError();
     
     const messageContent = content.trim();
     const tempId = `temp-${Date.now()}`;
@@ -183,6 +188,7 @@ export const MessageProvider = ({ children }) => {
       chatType: selectedChat?.type || 'group',
       senderId: user?.id || user?._id,
       senderName: 'You',
+      senderAvatar: user?.avatar,
       content: messageContent,
       type: type,
       timestamp: new Date(),
@@ -191,15 +197,19 @@ export const MessageProvider = ({ children }) => {
       readBy: [],
       reactions: [],
       replyTo: replyingTo ? {
-        messageId: replyingTo.id,
+        id: replyingTo.id,
+        messageId: replyingTo.id, // Support both formats
         content: replyingTo.content,
         senderName: replyingTo.senderName,
+        senderId: replyingTo.senderId,
         type: replyingTo.type
       } : null,
       attachments: [...messageAttachments, ...attachments],
       isDeleted: false,
       deletedFor: [],
-      isReported: false
+      isReported: false,
+      isEdited: false,
+      isForwarded: false
     };
     
     setMessages(prev => [...prev, optimisticMessage]);
@@ -215,7 +225,8 @@ export const MessageProvider = ({ children }) => {
       socket.emit('typing_stop', selectedChatId);
     }
     
-    try {
+    // Create retry operation
+    const sendOperation = async () => {
       const endpoint = selectedChat?.type === 'group' 
         ? `/api/chat/groups/${selectedChatId}/messages`
         : `/api/chat/private/${selectedChatId}/messages`;
@@ -233,26 +244,45 @@ export const MessageProvider = ({ children }) => {
         requestBody.attachments = optimisticMessage.attachments.map(att => att.id);
       }
       
-      const newMessage = await post(endpoint, requestBody);
+      return await postWithRetry(endpoint, requestBody, {}, 2); // Retry up to 2 times for message sending
+    };
+    
+    try {
+      const newMessage = await retryChatOperation(
+        sendOperation,
+        `sending message to chat ${selectedChatId}`,
+        2
+      );
       
+      // Handle corrected API response format
       const formattedMessage = {
         id: newMessage._id || newMessage.id,
         chatId: selectedChatId,
         chatType: selectedChat?.type || 'group',
         senderId: newMessage.senderId,
-        senderName: newMessage.senderName,
+        senderName: newMessage.senderName || 'You',
+        senderAvatar: newMessage.senderAvatar || user?.avatar,
         content: newMessage.content,
-        type: newMessage.type,
-        timestamp: new Date(newMessage.createdAt),
+        type: newMessage.type || newMessage.messageType,
+        timestamp: new Date(newMessage.createdAt || newMessage.timestamp),
         status: newMessage.status || 'sent',
         deliveredTo: newMessage.deliveredTo || [],
         readBy: newMessage.readBy || [],
         reactions: newMessage.reactions || [],
-        replyTo: newMessage.replyTo || null,
-        attachments: newMessage.attachments || [],
+        replyTo: newMessage.replyTo ? {
+          id: newMessage.replyTo.id || newMessage.replyTo.messageId,
+          messageId: newMessage.replyTo.id || newMessage.replyTo.messageId,
+          content: newMessage.replyTo.content,
+          senderId: newMessage.replyTo.senderId,
+          senderName: newMessage.replyTo.senderName
+        } : null,
+        attachments: newMessage.attachments || newMessage.media || [],
         isDeleted: false,
         deletedFor: [],
-        isReported: false
+        isReported: false,
+        isEdited: newMessage.isEdited || false,
+        isForwarded: newMessage.isForwarded || false,
+        forwardedFrom: newMessage.forwardedFrom
       };
       
       // Replace optimistic message with real message
@@ -290,14 +320,29 @@ export const MessageProvider = ({ children }) => {
         chatId: selectedChatId,
         type: type,
         replyToId: replyToId,
-        attachments: optimisticMessage.attachments
+        attachments: optimisticMessage.attachments,
+        originalMessage: optimisticMessage
       }]);
       
-      setError(err.message || 'Failed to send message');
+      setError({
+        message: err.message || 'Failed to send message',
+        type: 'send_message',
+        messageId: tempId,
+        canRetry: true,
+        timestamp: new Date()
+      });
+      
+      // Show user-friendly error notification
+      showToast({
+        message: 'Message failed to send. Check failed messages to retry.',
+        type: 'error',
+        duration: 8000
+      });
+      
     } finally {
       setIsSendingMessage(false);
     }
-  }, [selectedChatId, selectedChat, user, isSendingMessage, replyingTo, attachments, socket, post]);
+  }, [selectedChatId, isSendingMessage, clearChatError, selectedChat?.type, user?.id, user?._id, user?.avatar, replyingTo, attachments, socket, postWithRetry, retryChatOperation, showToast]);
 
   // Edit a message
   const editMessage = useCallback(async (messageId, content) => {
@@ -541,8 +586,8 @@ export const MessageProvider = ({ children }) => {
     }
   }, [selectedChatId, user, post]);
 
-  // Retry failed message
-  const retryFailedMessage = useCallback(async (messageId) => {
+  // Internal retry function to avoid circular dependencies
+  const retryFailedMessageInternal = useCallback(async (messageId) => {
     const failedMessage = failedMessages.find(msg => msg.id === messageId);
     if (!failedMessage) return;
     
@@ -553,7 +598,8 @@ export const MessageProvider = ({ children }) => {
       )
     );
     
-    try {
+    // Create retry operation
+    const retryOperation = async () => {
       const endpoint = selectedChat?.type === 'group' 
         ? `/api/chat/groups/${failedMessage.chatId}/messages`
         : `/api/chat/private/${failedMessage.chatId}/messages`;
@@ -571,26 +617,45 @@ export const MessageProvider = ({ children }) => {
         requestBody.attachments = failedMessage.attachments.map(att => att.id);
       }
       
-      const newMessage = await post(endpoint, requestBody);
+      return await postWithRetry(endpoint, requestBody, {}, 2);
+    };
+    
+    try {
+      const newMessage = await retryChatOperation(
+        retryOperation,
+        `retrying message ${messageId}`,
+        2
+      );
       
+      // Handle corrected API response format
       const formattedMessage = {
         id: newMessage._id || newMessage.id,
         chatId: failedMessage.chatId,
         chatType: selectedChat?.type || 'group',
         senderId: newMessage.senderId,
-        senderName: newMessage.senderName,
+        senderName: newMessage.senderName || 'You',
+        senderAvatar: newMessage.senderAvatar || user?.avatar,
         content: newMessage.content,
-        type: newMessage.type,
-        timestamp: new Date(newMessage.createdAt),
+        type: newMessage.type || newMessage.messageType,
+        timestamp: new Date(newMessage.createdAt || newMessage.timestamp),
         status: newMessage.status || 'sent',
         deliveredTo: newMessage.deliveredTo || [],
         readBy: newMessage.readBy || [],
         reactions: newMessage.reactions || [],
-        replyTo: newMessage.replyTo || null,
-        attachments: newMessage.attachments || [],
+        replyTo: newMessage.replyTo ? {
+          id: newMessage.replyTo.id || newMessage.replyTo.messageId,
+          messageId: newMessage.replyTo.id || newMessage.replyTo.messageId,
+          content: newMessage.replyTo.content,
+          senderId: newMessage.replyTo.senderId,
+          senderName: newMessage.replyTo.senderName
+        } : null,
+        attachments: newMessage.attachments || newMessage.media || [],
         isDeleted: false,
         deletedFor: [],
-        isReported: false
+        isReported: false,
+        isEdited: newMessage.isEdited || false,
+        isForwarded: newMessage.isForwarded || false,
+        forwardedFrom: newMessage.forwardedFrom
       };
       
       // Replace failed message with successful message
@@ -605,6 +670,9 @@ export const MessageProvider = ({ children }) => {
         prev.filter(msg => msg.id !== messageId)
       );
       
+      // Clear any related errors
+      setError(prev => prev?.messageId === messageId ? null : prev);
+      
       // Emit message via socket for real-time updates
       if (socket) {
         socket.emit('send_message', {
@@ -616,6 +684,13 @@ export const MessageProvider = ({ children }) => {
         });
       }
       
+      // Show success notification
+      showToast({
+        message: 'Message sent successfully!',
+        type: 'success',
+        duration: 3000
+      });
+      
     } catch (err) {
       console.error('Error retrying message:', err);
       
@@ -626,14 +701,75 @@ export const MessageProvider = ({ children }) => {
         )
       );
       
-      setError(err.message || 'Failed to retry message');
+      setError({
+        message: err.message || 'Failed to retry message',
+        type: 'retry_message',
+        messageId: messageId,
+        canRetry: true,
+        timestamp: new Date()
+      });
+      
+      // Show error notification with retry option
+      showToast({
+        message: 'Retry failed. Message still not sent.',
+        type: 'error',
+        duration: 5000,
+        action: {
+          label: 'Try Again',
+          onClick: () => retryFailedMessageInternal(messageId)
+        }
+      });
     }
-  }, [failedMessages, selectedChat, post, socket]);
+  }, [failedMessages, selectedChat, postWithRetry, retryChatOperation, socket, user, showToast]);
+
+  // Public retry function that calls the internal one
+  const retryFailedMessage = useCallback(async (messageId) => {
+    return retryFailedMessageInternal(messageId);
+  }, [retryFailedMessageInternal]);
 
   // Clear error
   const clearError = useCallback(() => {
     setError(null);
-  }, []);
+    clearChatError();
+  }, [clearChatError]);
+
+  // Manual refresh for failed message loads
+  const refreshMessages = useCallback(async () => {
+    if (!selectedChatId) return;
+    
+    setIsRetryingMessages(true);
+    setError(null);
+    clearChatError();
+    
+    try {
+      await loadMessages(selectedChatId);
+      showToast({
+        message: 'Messages refreshed successfully!',
+        type: 'success',
+        duration: 3000
+      });
+    } catch (err) {
+      console.error('Error refreshing messages:', err);
+      showToast({
+        message: 'Failed to refresh messages. Please try again.',
+        type: 'error',
+        duration: 5000
+      });
+    } finally {
+      setIsRetryingMessages(false);
+    }
+  }, [selectedChatId, loadMessages, clearChatError, showToast]);
+
+  // Retry last failed operation
+  const retryLastOperation = useCallback(async () => {
+    if (lastFailedOperation) {
+      try {
+        await lastFailedOperation();
+      } catch (err) {
+        console.error('Error retrying last operation:', err);
+      }
+    }
+  }, [lastFailedOperation]);
 
   // Update selected chat (called from unified useChat hook)
   const updateSelectedChat = useCallback((chatId, chat) => {
@@ -645,27 +781,39 @@ export const MessageProvider = ({ children }) => {
   useEffect(() => {
     if (!socket || !selectedChatId) return;
 
-    // Message events
+    // Message events with corrected API response format handling
     const handleMessageReceived = (data) => {
       if (data.chatId === selectedChatId) {
+        const msg = data.message;
         const formattedMessage = {
-          id: data.message.id,
+          id: msg.id || msg._id,
           chatId: data.chatId,
           chatType: selectedChat?.type || 'group',
-          senderId: data.message.senderId,
-          senderName: data.message.senderName,
-          content: data.message.content,
-          type: data.message.type,
-          timestamp: new Date(data.message.timestamp),
-          status: data.message.status,
-          deliveredTo: data.message.deliveredTo || [],
-          readBy: data.message.readBy || [],
-          reactions: data.message.reactions || [],
-          replyTo: data.message.replyTo || null,
-          attachments: data.message.attachments || [],
-          isDeleted: false,
-          deletedFor: [],
-          isReported: false
+          senderId: msg.senderId,
+          senderName: msg.senderName || 'Unknown User',
+          senderAvatar: msg.senderAvatar,
+          content: msg.content,
+          type: msg.type || msg.messageType || 'text',
+          timestamp: new Date(msg.timestamp || msg.createdAt),
+          status: msg.status || 'sent',
+          deliveredTo: msg.deliveredTo || [],
+          readBy: msg.readBy || [],
+          reactions: msg.reactions || [],
+          replyTo: msg.replyTo ? {
+            id: msg.replyTo.id || msg.replyTo.messageId,
+            messageId: msg.replyTo.id || msg.replyTo.messageId,
+            content: msg.replyTo.content,
+            senderId: msg.replyTo.senderId,
+            senderName: msg.replyTo.senderName
+          } : null,
+          attachments: msg.attachments || msg.media || [],
+          isDeleted: msg.isDeleted || false,
+          deletedFor: msg.deletedFor || [],
+          isReported: msg.isReported || false,
+          isEdited: msg.isEdited || false,
+          isForwarded: msg.isForwarded || false,
+          forwardedFrom: msg.forwardedFrom,
+          moderationStatus: msg.moderationStatus
         };
         
         setMessages(prev => [...prev, formattedMessage]);
@@ -762,8 +910,10 @@ export const MessageProvider = ({ children }) => {
     showEmojiPicker,
     isSendingMessage,
     isLoadingMessages,
+    isRetryingMessages,
     failedMessages,
     error,
+    lastFailedOperation,
     
     // Actions
     loadMessages,
@@ -787,6 +937,8 @@ export const MessageProvider = ({ children }) => {
     retryFailedMessage,
     clearError,
     updateSelectedChat,
+    refreshMessages,
+    retryLastOperation,
     
     // UI state setters
     setShowEmojiPicker,

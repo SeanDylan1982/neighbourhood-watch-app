@@ -153,6 +153,7 @@ const MessageInput = React.forwardRef(({
   return (
     <Paper 
       elevation={0}
+      data-message-input
       sx={{
         p: 2,
         borderTop: 1,

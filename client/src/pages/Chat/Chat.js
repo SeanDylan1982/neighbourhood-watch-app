@@ -160,7 +160,7 @@ const Chat = () => {
       setChatGroups([]);
       setDataLoaded(true); // Still mark as loaded to prevent infinite loading
     }
-  }, [get, handleChatLoad, formatTime, getCachedChatGroups, preloadChatData]);
+  }, [get, handleChatLoad, formatTime, getCachedChatGroups]);
 
   const fetchAvailableUsers = useCallback(async () => {
     try {
@@ -175,11 +175,12 @@ const Chat = () => {
     }
   }, [get, handleChatLoad]);
 
-  // Fetch group members with caching - moved here to be available for socket effects
+  // Enhanced group members fetching with better error handling and validation
   const fetchGroupMembers = useCallback(
     async (groupId) => {
       if (!groupId) {
         console.log("fetchGroupMembers: No groupId provided");
+        setGroupMembers([]);
         return;
       }
 
@@ -208,98 +209,107 @@ const Chat = () => {
           groupId
         );
         setLoadingMembers(false);
-      }, 5000);
+      }, 10000); // Increased timeout to 10 seconds
 
       try {
-        // Try to fetch actual member data from the server
-        try {
-          const data = await get(`/api/chat/groups/${groupId}/members`);
-          const members = Array.isArray(data) ? data : [];
-          console.log("API returned members:", members);
+        // Fetch actual member data from the server
+        const data = await get(`/api/chat/groups/${groupId}/members`);
+        
+        // Validate response
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid response format - expected array');
+        }
 
-          if (members.length > 0) {
-            // Cache the result
-            setMemberCache((prev) => ({
-              ...prev,
-              [groupId]: {
-                members,
-                timestamp: Date.now(),
-              },
-            }));
-
-            setGroupMembers(members);
-            console.log("Set members from API:", members);
-            return;
+        // Validate and enhance member data
+        const validMembers = data.filter(member => {
+          const isValid = member && 
+                         member._id && 
+                         (member.firstName || member.lastName);
+          
+          if (!isValid) {
+            console.warn('Invalid member data:', member);
           }
-        } catch (apiError) {
-          console.warn(
-            "API endpoint not available, using fallback data:",
-            apiError.message
-          );
-        }
+          
+          return isValid;
+        });
 
-        // Fallback: Generate group-specific mock data
-        console.log(
-          "Using group-specific mock member data for groupId:",
-          groupId
-        );
+        // Enhance member data for frontend use
+        const enhancedMembers = validMembers.map(member => ({
+          ...member,
+          id: member._id, // Ensure both _id and id are available
+          fullName: `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Unknown User',
+          displayName: `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Unknown User',
+          initials: getInitials(member.firstName, member.lastName),
+          hasProfileImage: !!member.profileImageUrl
+        }));
 
-        const finalMembers = [];
-
-        // Add current user first
-        if (user) {
-          finalMembers.push({
-            _id: user._id || user.id,
-            firstName: user.firstName || "You",
-            lastName: user.lastName || "",
-          });
-        }
-
-        // Generate mock members based on group ID for variation
-        const groupHash = groupId.slice(-2); // Use last 2 chars of group ID for variation
-        const memberNames = [
-          ["Alice", "Johnson"],
-          ["Bob", "Smith"],
-          ["Carol", "Davis"],
-          ["David", "Wilson"],
-          ["Emma", "Brown"],
-          ["Frank", "Miller"],
-        ];
-
-        // Use group hash to select different names for different groups
-        const startIndex = parseInt(groupHash, 16) % memberNames.length;
-
-        for (let i = 1; i <= 2; i++) {
-          // Generate 2 additional members
-          const nameIndex = (startIndex + i - 1) % memberNames.length;
-          finalMembers.push({
-            _id: `${groupId}-member-${i}`,
-            firstName: memberNames[nameIndex][0],
-            lastName: memberNames[nameIndex][1],
-          });
-        }
-
-        console.log(
-          "Generated group-specific mock members for",
-          groupId,
-          ":",
-          finalMembers
-        );
+        console.log("API returned valid members:", enhancedMembers.length);
 
         // Cache the result
         setMemberCache((prev) => ({
           ...prev,
           [groupId]: {
-            members: finalMembers,
+            members: enhancedMembers,
             timestamp: Date.now(),
           },
         }));
 
-        setGroupMembers(finalMembers);
-        console.log("Set final members for group", groupId, ":", finalMembers);
+        setGroupMembers(enhancedMembers);
+        console.log("Set members from API:", enhancedMembers);
+        
       } catch (error) {
         console.error("Error fetching group members:", error);
-        setGroupMembers([]);
+        
+        // Check if we have cached data to fall back to
+        const cachedData = memberCache[groupId];
+        if (cachedData && cachedData.members.length > 0) {
+          console.log("Using stale cached data due to API error");
+          setGroupMembers(cachedData.members);
+        } else {
+          // Only use mock data if no cached data is available
+          console.log("No cached data available, using mock data for development");
+          
+          const mockMembers = [];
+
+          // Add current user first
+          if (user) {
+            mockMembers.push({
+              _id: user._id || user.id,
+              id: user._id || user.id,
+              firstName: user.firstName || "You",
+              lastName: user.lastName || "",
+              fullName: `${user.firstName || "You"} ${user.lastName || ""}`.trim(),
+              displayName: "You",
+              role: "member",
+              profileImageUrl: user.profileImageUrl || null,
+              initials: getInitials(user.firstName, user.lastName),
+              hasProfileImage: !!user.profileImageUrl
+            });
+          }
+
+          // Generate a few mock members for development
+          const mockMemberData = [
+            { firstName: "Alice", lastName: "Johnson", role: "admin" },
+            { firstName: "Bob", lastName: "Smith", role: "member" }
+          ];
+
+          mockMemberData.forEach((memberData, index) => {
+            mockMembers.push({
+              _id: `mock-${groupId}-${index}`,
+              id: `mock-${groupId}-${index}`,
+              ...memberData,
+              fullName: `${memberData.firstName} ${memberData.lastName}`,
+              displayName: `${memberData.firstName} ${memberData.lastName}`,
+              profileImageUrl: null,
+              initials: getInitials(memberData.firstName, memberData.lastName),
+              hasProfileImage: false,
+              joinedAt: new Date().toISOString()
+            });
+          });
+
+          setGroupMembers(mockMembers);
+          console.log("Set mock members:", mockMembers);
+        }
       } finally {
         clearTimeout(loadingTimeout);
         setLoadingMembers(false);
@@ -308,6 +318,22 @@ const Chat = () => {
     },
     [get, memberCache, user]
   );
+
+  // Helper function to get user initials
+  const getInitials = (firstName, lastName) => {
+    const first = (firstName || '').trim();
+    const last = (lastName || '').trim();
+    
+    if (first && last) {
+      return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+    } else if (first) {
+      return first.charAt(0).toUpperCase();
+    } else if (last) {
+      return last.charAt(0).toUpperCase();
+    }
+    
+    return '?';
+  };
 
   // Initialize chat data when component mounts
   useEffect(() => {
@@ -1136,7 +1162,7 @@ const Chat = () => {
                                 variant="subtitle2"
                                 sx={{ mb: 1, fontWeight: "bold" }}
                               >
-                                Group Members:
+                                Group Members ({groupMembers.length}):
                               </Typography>
                               {(() => {
                                 console.log(
@@ -1159,29 +1185,52 @@ const Chat = () => {
                                   );
                                 } else if (groupMembers.length > 0) {
                                   return (
-                                    <Box>
+                                    <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
                                       {groupMembers.map((member, index) => (
-                                        <Typography
+                                        <Box
                                           key={member._id || member.id}
-                                          variant="body2"
                                           sx={{
-                                            mb:
-                                              index < groupMembers.length - 1
-                                                ? 0.5
-                                                : 0,
+                                            mb: index < groupMembers.length - 1 ? 0.5 : 0,
                                             display: "flex",
                                             alignItems: "center",
-                                            "&:before": {
-                                              content: '"•"',
-                                              marginRight: 1,
-                                              color: "primary.main",
-                                            },
+                                            gap: 1
                                           }}
                                         >
-                                          {`${member.firstName || ""} ${
-                                            member.lastName || ""
-                                          }`.trim() || "Unknown User"}
-                                        </Typography>
+                                          <Box
+                                            sx={{
+                                              width: 6,
+                                              height: 6,
+                                              borderRadius: '50%',
+                                              bgcolor: member.role === 'admin' ? 'error.main' : 
+                                                      member.role === 'moderator' ? 'warning.main' : 
+                                                      'primary.main',
+                                              flexShrink: 0
+                                            }}
+                                          />
+                                          <Typography
+                                            variant="body2"
+                                            sx={{
+                                              fontWeight: member.role === 'admin' ? 'bold' : 'normal'
+                                            }}
+                                          >
+                                            {member.displayName || member.fullName || 
+                                             `${member.firstName || ""} ${member.lastName || ""}`.trim() || 
+                                             "Unknown User"}
+                                            {member.role && member.role !== 'member' && (
+                                              <Typography
+                                                component="span"
+                                                variant="caption"
+                                                sx={{
+                                                  ml: 0.5,
+                                                  color: member.role === 'admin' ? 'error.main' : 'warning.main',
+                                                  fontWeight: 'bold'
+                                                }}
+                                              >
+                                                ({member.role})
+                                              </Typography>
+                                            )}
+                                          </Typography>
+                                        </Box>
                                       ))}
                                     </Box>
                                   );
@@ -1194,7 +1243,7 @@ const Chat = () => {
                                         color: "text.secondary",
                                       }}
                                     >
-                                      Member data unavailable
+                                      No members found
                                     </Typography>
                                   );
                                 }

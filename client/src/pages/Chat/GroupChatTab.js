@@ -1,24 +1,22 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   Typography,
   Alert,
   useTheme,
-  useMediaQuery,
-  CircularProgress
+  useMediaQuery
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useChat } from '../../hooks/useChat';
 import { useAuth } from '../../contexts/AuthContext';
 import ChatWindow from '../../components/Chat/ChatWindow/ChatWindow';
+import ResponsiveChatContainer from '../../components/Chat/ChatWindow/ResponsiveChatContainer';
 import { ChatSkeleton } from '../../components/Common/LoadingSkeleton';
 import ChatWelcomeMessage from '../../components/Welcome/ChatWelcomeMessage';
-
-// Lazy load heavy components for better performance
-const ChatList = lazy(() => import('../../components/Chat/ChatList/ChatList'));
+import ChatList from '../../components/Chat/ChatList/ChatList';
+import ChatListErrorBoundary from '../../components/Chat/ChatList/ChatListErrorBoundary';
 
 const GroupChatTab = () => {
   const theme = useTheme();
@@ -134,100 +132,82 @@ const GroupChatTab = () => {
     );
   }
 
-  return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Grid container sx={{ height: '100%', flex: 1 }}>
+  // Chat List Component
+  const chatListComponent = (
+    <Card sx={{ height: '100%', borderRadius: 0, display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Typography variant="h6" gutterBottom>
+          Group Chats
+        </Typography>
+
+        {/* Welcome message for new users */}
+        {groupChats.length === 0 && (
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChatWelcomeMessage
+              hasGroupChats={false}
+              hasPrivateChats={chats.some(chat => chat.type === 'private')}
+            />
+          </Box>
+        )}
+
         {/* Chat List */}
-        <Grid
-          item
-          xs={12}
-          md={4}
-          sx={{
-            display: { xs: localSelectedChatId ? 'none' : 'block', md: 'block' },
-            height: '100%'
-          }}
-        >
-          <Card sx={{ height: '100%', borderRadius: 0 }}>
-            <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="h6" gutterBottom>
-                Group Chats
-              </Typography>
-
-              {/* Welcome message for new users */}
-              {groupChats.length === 0 && (
-                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChatWelcomeMessage
-                    hasGroupChats={false}
-                    hasPrivateChats={chats.some(chat => chat.type === 'private')}
-                  />
-                </Box>
-              )}
-
-              {/* Chat List */}
-              {groupChats.length > 0 && (
-                <Box sx={{ flex: 1, overflow: 'hidden' }}>
-                  <Suspense fallback={
-                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                      <CircularProgress />
-                    </Box>
-                  }>
-                    <ChatList
-                      chatType="group"
-                      chats={groupChats}
-                      selectedChatId={localSelectedChatId}
-                      onChatSelect={handleChatSelect}
-                      onChatAction={handleChatAction}
-                    />
-                  </Suspense>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Chat Window */}
-        <Grid
-          item
-          xs={12}
-          md={8}
-          sx={{
-            display: { xs: localSelectedChatId ? 'block' : 'none', md: 'block' },
-            height: '100%'
-          }}
-        >
-          <Card sx={{ height: '100%', borderRadius: 0 }}>
-            {localSelectedChatId && selectedChat ? (
-              <ChatWindow
-                chat={selectedChat}
-                messages={messages}
-                onSendMessage={sendMessage}
-                onBack={isMobile ? handleBack : undefined}
+        {groupChats.length > 0 && (
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <ChatListErrorBoundary>
+              <ChatList
+                chatType="group"
+                chats={groupChats}
+                selectedChatId={localSelectedChatId}
+                onChatSelect={handleChatSelect}
+                onChatAction={handleChatAction}
               />
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  p: 3,
-                  textAlign: 'center'
-                }}
-              >
-                <Alert severity="info" sx={{ width: '100%', maxWidth: 400 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Welcome to Group Chats
-                  </Typography>
-                  <Typography variant="body2">
-                    Select a group chat from the list to start messaging, or create a new group to get started.
-                  </Typography>
-                </Alert>
-              </Box>
-            )}
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+            </ChatListErrorBoundary>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  // Message Content Component
+  const messageContentComponent = localSelectedChatId && selectedChat ? (
+    <ChatWindow
+      chat={selectedChat}
+      messages={messages}
+      onSendMessage={sendMessage}
+      onBack={isMobile ? handleBack : undefined}
+    />
+  ) : (
+    <Card sx={{ height: '100%', borderRadius: 0 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          p: 3,
+          textAlign: 'center'
+        }}
+      >
+        <Alert severity="info" sx={{ width: '100%', maxWidth: 400 }}>
+          <Typography variant="h6" gutterBottom>
+            Welcome to Group Chats
+          </Typography>
+          <Typography variant="body2">
+            Select a group chat from the list to start messaging, or create a new group to get started.
+          </Typography>
+        </Alert>
+      </Box>
+    </Card>
+  );
+
+  return (
+    <ResponsiveChatContainer
+      chatListComponent={chatListComponent}
+      messageContentComponent={messageContentComponent}
+      selectedChatId={localSelectedChatId}
+      showChatList={true}
+      showMessageContent={true}
+    />
   );
 };
 

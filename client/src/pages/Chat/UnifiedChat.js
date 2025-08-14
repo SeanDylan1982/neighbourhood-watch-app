@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -7,8 +7,7 @@ import {
   IconButton,
   Tooltip,
   useTheme,
-  useMediaQuery,
-  CircularProgress
+  useMediaQuery
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -19,11 +18,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useChat } from '../../hooks/useChat';
 import { useAuth } from '../../contexts/AuthContext';
 import ErrorDisplay from '../../components/Common/ErrorDisplay';
-
-// Lazy load chat tab components for better performance
-const GroupChatTab = lazy(() => import('./GroupChatTab'));
-const PrivateChatTab = lazy(() => import('./PrivateChatTab'));
-const CreateGroupChatModal = lazy(() => import('../../components/Chat/Common/CreateGroupChatModal'));
+import GroupChatTab from './GroupChatTab';
+import PrivateChatTab from './PrivateChatTab';
+import CreateGroupChatModal from '../../components/Chat/Common/CreateGroupChatModal';
 
 const UnifiedChat = () => {
   const theme = useTheme();
@@ -198,15 +195,7 @@ const UnifiedChat = () => {
           aria-labelledby="group-tab"
           sx={{ height: '100%' }}
         >
-          {activeTab === 0 && (
-            <Suspense fallback={
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <CircularProgress />
-              </Box>
-            }>
-              <GroupChatTab />
-            </Suspense>
-          )}
+          {activeTab === 0 && <GroupChatTab />}
         </Box>
 
         {/* Private Chat Tab */}
@@ -217,27 +206,17 @@ const UnifiedChat = () => {
           aria-labelledby="private-tab"
           sx={{ height: '100%' }}
         >
-          {activeTab === 1 && (
-            <Suspense fallback={
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <CircularProgress />
-              </Box>
-            }>
-              <PrivateChatTab />
-            </Suspense>
-          )}
+          {activeTab === 1 && <PrivateChatTab />}
         </Box>
       </Box>
 
       {/* Create Group Chat Modal */}
       {showCreateGroupModal && (
-        <Suspense fallback={null}>
-          <CreateGroupChatModal
-            open={showCreateGroupModal}
-            onClose={() => setShowCreateGroupModal(false)}
-            onGroupCreated={handleGroupCreated}
-          />
-        </Suspense>
+        <CreateGroupChatModal
+          open={showCreateGroupModal}
+          onClose={() => setShowCreateGroupModal(false)}
+          onGroupCreated={handleGroupCreated}
+        />
       )}
     </Box>
   );

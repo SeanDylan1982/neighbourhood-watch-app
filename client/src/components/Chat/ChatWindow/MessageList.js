@@ -197,6 +197,7 @@ const MessageList = ({
     <Box
       ref={containerRef}
       className={className}
+      data-messages-container
       sx={{
         flex: 1,
         overflowY: 'auto',

@@ -180,7 +180,7 @@ const ChatWindow = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, keyboard]);
+  }, [messages, keyboard, scrollToBottom]);
 
   // Handle typing indicators
   useEffect(() => {
