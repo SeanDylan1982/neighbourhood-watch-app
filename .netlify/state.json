@@ -1,0 +1,21 @@
+{
+	"siteId": "91960294-c557-48ae-ad1a-1e6811d8ba71",
+	"geolocation": {
+		"data": {
+			"city": "Hoedspruit",
+			"country": {
+				"code": "ZA",
+				"name": "South Africa"
+			},
+			"subdivision": {
+				"code": "LP",
+				"name": "Limpopo"
+			},
+			"timezone": "Africa/Johannesburg",
+			"latitude": -24.3486,
+			"longitude": 30.9694,
+			"postalCode": "1371"
+		},
+		"timestamp": 1756233610099
+	}
+}
