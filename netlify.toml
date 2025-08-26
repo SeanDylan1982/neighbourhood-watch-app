@@ -1,0 +1,26 @@
+[build]
+  functions = "netlify/functions"
+  publish = "client/build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Redirect API calls to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Handle client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin", "user"]}
+
+[functions]
+  node_bundler = "esbuild"
+
+# Function-specific settings
+[functions."*"]
+  timeout = 30

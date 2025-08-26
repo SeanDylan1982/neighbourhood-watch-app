@@ -3,21 +3,16 @@ const RAILWAY_API_URL = "https://neighbourwatch-development.up.railway.app";
 const LOCAL_API_URL = "http://localhost:5001";
 
 const getApiUrl = () => {
-  // Production: Use Railway URL
-  if (process.env.NODE_ENV === "production") {
-    console.log("🚀 Production mode: Using Railway backend URL");
-    return RAILWAY_API_URL;
-  }
-  
-  // Development: Check environment variable first, then default to localhost
+  // Check environment variable first (highest priority)
   const envUrl = process.env.REACT_APP_API_URL;
   if (envUrl) {
-    console.log("🔧 Development mode: Using environment URL:", envUrl);
+    console.log("🔧 Using environment URL:", envUrl);
     return envUrl;
   }
   
-  // Default to localhost for development
-  console.log("🏠 Development mode: Using localhost backend");
+  // For now, always use localhost since Railway is not working
+  // TODO: Update this to use Netlify Functions URL when deployed
+  console.log("🏠 Using localhost backend (Railway is down)");
   return LOCAL_API_URL;
 };
 
