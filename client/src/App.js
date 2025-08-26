@@ -39,6 +39,7 @@ import serviceWorkerManager from "./services/ServiceWorkerManager";
 import manifestValidator from "./services/ManifestValidator";
 import productionErrorHandler from "./services/ProductionErrorHandler";
 import { initChunkLoadingFixes } from "./utils/chunkLoadingFix";
+import { runAllTests } from "./utils/testApiConfig";
 
 const theme = createTheme({
   palette: {
@@ -106,6 +107,9 @@ function App() {
 
     // Initialize chunk loading fixes
     initChunkLoadingFixes();
+
+    // Make API test utilities available in browser console for debugging
+    window.runAllApiTests = runAllTests;
 
     // Initialize service worker with error handling
     const initServiceWorker = async () => {

@@ -8,6 +8,7 @@ import ChatBackground from './ChatBackground';
 import ChatSidebar from '../Common/ChatSidebar';
 import InChatSearchBar from '../Common/InChatSearchBar';
 import OfflineIndicator from '../Common/OfflineIndicator';
+import MessageForwardDialog from '../MessageInteractions/MessageForwardDialog';
 import { useChat } from '../../../hooks/useChat';
 import { useSocket } from '../../../contexts/SocketContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -15,6 +16,8 @@ import { useDesktopFeatures } from '../../../hooks/useResponsive';
 import { useChatKeyboard } from '../../../hooks/useVirtualKeyboard';
 import useInChatSearch from '../../../hooks/useInChatSearch';
 import useOfflineManager from '../../../hooks/useOfflineManager';
+import useMessageForwarding from '../../../hooks/useMessageForwarding';
+import { useToast } from '../../../contexts/ToastContext';
 
 /**
  * Unified ChatWindow component that works for both group and private chats
@@ -36,10 +39,14 @@ const ChatWindow = ({
   const { user } = useAuth();
   const { socket } = useSocket();
   const { features } = useDesktopFeatures();
+  const { showToast } = useToast();
+  const { forwardMessage, isForwarding } = useMessageForwarding();
   const [typingUsers, setTypingUsers] = useState({});
   const [replyingTo, setReplyingTo] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(showSidebar && features.sidebar);
   const [displayMessages, setDisplayMessages] = useState(messages);
+  const [forwardDialogOpen, setForwardDialogOpen] = useState(false);
+  const [messageToForward, setMessageToForward] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
@@ -295,6 +302,33 @@ const ChatWindow = ({
     setReplyingTo(null);
   };
 
+  // Handle forward message
+  const handleForwardMessage = (messageId) => {
+    const messageToForward = messages.find(msg => msg.id === messageId);
+    if (messageToForward) {
+      setMessageToForward(messageToForward);
+      setForwardDialogOpen(true);
+    }
+  };
+
+  // Handle forward dialog close
+  const handleForwardDialogClose = () => {
+    setForwardDialogOpen(false);
+    setMessageToForward(null);
+  };
+
+  // Handle forward confirmation
+  const handleForwardConfirm = async (message, targetChats) => {
+    try {
+      await forwardMessage(message, targetChats);
+      showToast('Message forwarded successfully', 'success');
+      handleForwardDialogClose();
+    } catch (error) {
+      console.error('Failed to forward message:', error);
+      showToast(error.message || 'Failed to forward message', 'error');
+    }
+  };
+
   // Handle sidebar toggle
   const handleSidebarToggle = () => {
     const newState = !sidebarOpen;
@@ -450,6 +484,14 @@ const ChatWindow = ({
                 handleRetryMessage(messageId);
               } else if (action === 'remove_failed_message') {
                 handleRemoveFailedMessage(messageId);
+              } else if (action === 'forward') {
+                handleForwardMessage(messageId);
+              } else if (action === 'scroll_to_message') {
+                // Handle scrolling to replied message
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                  messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
               } else if (onMessageAction) {
                 onMessageAction(messageId, action, data);
               }
@@ -501,6 +543,14 @@ const ChatWindow = ({
           onAction={handleSidebarAction}
         />
       )}
+
+      {/* Message Forward Dialog */}
+      <MessageForwardDialog
+        open={forwardDialogOpen}
+        onClose={handleForwardDialogClose}
+        message={messageToForward}
+        onForward={handleForwardConfirm}
+      />
     </Box>
   );
 };

@@ -10,7 +10,6 @@ import {
   useMediaQuery
 } from '@mui/material';
 import {
-  Add as AddIcon,
   Group as GroupIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
@@ -27,7 +26,6 @@ const UnifiedChat = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
   const { error, clearError, loadChats, createGroupChat } = useChat();
   
   // Tab state - 0 for group chats, 1 for private chats

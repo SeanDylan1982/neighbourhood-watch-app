@@ -139,6 +139,32 @@ const MessageBubble = ({
     }
   };
 
+  // Get reply preview text
+  const getReplyPreviewText = (replyTo) => {
+    if (!replyTo) return '';
+    
+    const content = replyTo.content || '';
+    const maxLength = 100;
+    
+    // Handle different message types
+    switch (replyTo.type) {
+      case 'image':
+        return '🖼️ Photo';
+      case 'audio':
+        return '🎙️ Audio message';
+      case 'document':
+        return `📄 ${replyTo.filename || 'Document'}`;
+      case 'location':
+        return '📍 Location';
+      case 'contact':
+        return '👤 Contact';
+      default:
+        return content.length > maxLength 
+          ? `${content.substring(0, maxLength)}...`
+          : content;
+    }
+  };
+
   // Get forwarding metadata
   const forwardingMetadata = getForwardingMetadata(message);
 
@@ -146,6 +172,7 @@ const MessageBubble = ({
     <Box
       ref={messageRef}
       className={className}
+      data-message-id={message.id || message._id}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       {...messageEventHandlers}
@@ -221,19 +248,34 @@ const MessageBubble = ({
               mb: 1,
               p: 1,
               borderLeft: 3,
-              borderColor: 'primary.main',
+              borderColor: isOwn ? 'rgba(255,255,255,0.5)' : 'primary.main',
               bgcolor: 'rgba(0,0,0,0.1)',
-              borderRadius: 1
+              borderRadius: 1,
+              cursor: 'pointer',
+              '&:hover': {
+                bgcolor: 'rgba(0,0,0,0.15)'
+              }
+            }}
+            onClick={() => {
+              // Scroll to original message if available
+              if (onMessageAction) {
+                onMessageAction(message.replyTo.id || message.replyTo.messageId, 'scroll_to_message');
+              }
             }}
           >
-            <Typography variant="caption" sx={{ fontWeight: 'medium', opacity: 0.8 }}>
-              {message.replyTo.senderName}
+            <Typography variant="caption" sx={{ 
+              fontWeight: 'medium', 
+              opacity: 0.8,
+              color: isOwn ? 'rgba(255,255,255,0.8)' : 'primary.main'
+            }}>
+              {message.replyTo.senderName || 'Unknown'}
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.7, fontSize: '0.875rem' }}>
-              {message.replyTo.content.length > 100 
-                ? `${message.replyTo.content.substring(0, 100)}...`
-                : message.replyTo.content
-              }
+            <Typography variant="body2" sx={{ 
+              opacity: 0.7, 
+              fontSize: '0.875rem',
+              color: isOwn ? 'rgba(255,255,255,0.7)' : 'text.secondary'
+            }}>
+              {getReplyPreviewText(message.replyTo)}
             </Typography>
           </Box>
         )}

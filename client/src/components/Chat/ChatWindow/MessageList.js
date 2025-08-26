@@ -17,6 +17,7 @@ const MessageList = ({
   typingUsers = {},
   onReaction,
   onReply,
+  onForward,
   onMessageAction,
   className = '',
   enableVirtualization = true,
@@ -300,6 +301,7 @@ const MessageList = ({
                         showTime={messageIndex === group.messages.length - 1}
                         onReaction={onReaction}
                         onReply={onReply}
+                        onForward={onForward}
                         onMessageAction={onMessageAction}
                         searchQuery={searchQuery}
                         isHighlighted={highlightedMessageId === (message.id || `msg-${actualIndex}-${messageIndex}`)}
@@ -360,6 +362,7 @@ const MessageList = ({
                   showTime={messageIndex === group.messages.length - 1}
                   onReaction={onReaction}
                   onReply={onReply}
+                  onForward={onForward}
                   onMessageAction={onMessageAction}
                   searchQuery={searchQuery}
                   isHighlighted={highlightedMessageId === (message.id || `msg-${groupIndex}-${messageIndex}`)}
