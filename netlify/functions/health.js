@@ -18,4 +18,13 @@ exports.handler = async (event, context) => {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',
       platform: 'netlify-functions',
-      ve
+      version: '1.0.0',
+    });
+
+  } catch (error) {
+    console.error('Health check error:', error);
+    return createResponse(500, { 
+      error: 'Internal server error' 
+    });
+  }
+};

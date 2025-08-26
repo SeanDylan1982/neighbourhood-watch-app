@@ -37,7 +37,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3030 react-scripts start",
     "build": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run validate-assets",
     "build:prod": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run validate-assets && npm run copy-assets",
     "validate-assets": "node scripts/validate-assets.js",

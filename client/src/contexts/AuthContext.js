@@ -5,17 +5,12 @@ import { API_BASE_URL } from '../config/api';
 // FORCE CLEAR any existing axios configuration
 delete axios.defaults.baseURL;
 
-// Configure axios base URL with VALIDATION
-const VALIDATED_API_URL = API_BASE_URL.includes('neighbourwatch-development.up.railway.app') 
-  ? API_BASE_URL 
-  : 'https://neighbourwatch-development.up.railway.app';
-
-console.log('🔧 AuthContext - VALIDATED API URL:', VALIDATED_API_URL);
+// Configure axios base URL - use the API_BASE_URL from config
+console.log('🔧 AuthContext - API URL:', API_BASE_URL);
 console.log('🔧 AuthContext - Environment:', process.env.NODE_ENV);
-console.log('🔧 AuthContext - Original API_BASE_URL:', API_BASE_URL);
 
-// Set the validated URL
-axios.defaults.baseURL = VALIDATED_API_URL;
+// Set the API URL from configuration
+axios.defaults.baseURL = API_BASE_URL;
   
 // Add request/response interceptors for debugging
 axios.interceptors.request.use(request => {
