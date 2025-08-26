@@ -15,6 +15,8 @@
 
 - [ ] 3. Test CORS configuration
 
+
+
   - Verify that authentication requests work from localhost to Railway backend
   - Test that preflight OPTIONS requests are handled correctly
   - Confirm that credentials are properly sent and received
